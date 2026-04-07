@@ -57,8 +57,8 @@ mvn spring-boot:run
 O con el wrapper de Maven:
 
 ```bash
-./mvnw spring-boot:run   # Linux / macOS
-mvnw spring-boot:run # Windows
+./mvn spring-boot:run  # Linux / macOS
+mvn spring-boot:run # Windows
 ```
 
 ### 3. Abrir la aplicación
