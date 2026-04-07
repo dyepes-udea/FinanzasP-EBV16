@@ -1,6 +1,4 @@
 # FinanzasP-EBV16
-BackEnd de proyecto Sprintboot Analisis de finanzas personales
-
 # Control de Finanzas Personales
 
 Aplicación web para gestionar ingresos y gastos personales. Backend desarrollado con **Spring Boot 3** y frontend en **React 18** (via CDN, sin build step).
