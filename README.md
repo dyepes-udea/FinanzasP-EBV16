@@ -102,17 +102,6 @@ http://localhost:8080
 
 ---
 
-## Configuración de la base de datos
-
-La aplicación usa **H2 en memoria** (`mem:finanzasdb`). Los datos se pierden al reiniciar — ideal para desarrollo.
-
-| Parámetro | Valor |
-|---|---|
-| URL JDBC | `jdbc:h2:mem:finanzasdb` |
-| Usuario | `sa` |
-| Contraseña | *(vacía)* |
-| DDL auto | `create-drop` |
-
 ### Consola H2 (inspección en tiempo real)
 
 Con el servidor corriendo, accede a:
