@@ -1,143 +1,206 @@
 # FinanzasP-EBV16
 # Control de Finanzas Personales
 
-Aplicación web para gestionar ingresos y gastos personales. Backend desarrollado con **Spring Boot 3** y frontend en **React 18** (via CDN, sin build step).
+Aplicación web para gestionar ingresos y gastos personales.
+
+- Backend desarrollado con Spring Boot 3
+- Frontend en HTML, CSS y JavaScript (vanilla)
 
 ---
 
 ## Tecnologías utilizadas
 
 ### Backend
-| Dependencia | Versión | Descripción |
+| Tecnología | Versión | Descripción |
 |---|---|---|
-| Java | 17 | Lenguaje de programación |
-| Spring Boot | 3.2.4 | Framework principal |
-| spring-boot-starter-web | 3.2.4 | API REST con Spring MVC + Tomcat embebido |
-| spring-boot-starter-data-jpa | 3.2.4 | Acceso a datos con Hibernate/JPA |
-| spring-boot-starter-validation | 3.2.4 | Validaciones con Jakarta Bean Validation |
-| H2 Database | (runtime) | Base de datos en memoria (no requiere instalación) |
-| spring-boot-starter-test | (test) | JUnit 5 + Mockito para pruebas |
-| spring-boot-maven-plugin | 3.2.4 | Empaquetado y ejecución con Maven |
-
-### Frontend (CDN — sin instalación)
-| Librería | Versión | Descripción |
-|---|---|---|
-| React | 18 | Librería de UI (componentes) |
-| ReactDOM | 18 | Renderizado en el navegador |
-| Babel Standalone | latest | Transpila JSX directamente en el navegador |
-
-> El frontend vive en `src/main/resources/static/index.html` y es servido automáticamente por Spring Boot como recurso estático.
+| Java | 17 | Lenguaje principal |
+| Spring Boot | 3.2.4 | Framework backend |
+| Spring Web | 3.2.4 | API REST |
+| Spring Data JPA | 3.2.4 | Persistencia con Hibernate |
+| Validation | 3.2.4 | Validaciones |
+| H2 Database | Runtime | Base de datos en memoria |
+| Maven | 3.6+ | Gestión de dependencias |
 
 ---
 
-## Requisitos previos
+### Frontend
+| Tecnología | Descripción |
+|---|---|
+| HTML5 | Estructura |
+| CSS3 | Estilos |
+| JavaScript | Lógica del cliente |
 
-- **Java 17** o superior
-- **Maven 3.6+** (o usar el wrapper `./mvnw`)
+Ubicación:
+src/main/resources/static/
 
-> **No se necesita Node.js** — el frontend usa React via CDN.
+Incluye:
+- index.html → App principal
+- admin.html → Categorías de gasto
+- admin-fuentes.html → Fuentes de ingreso
+- /js/*.js → Lógica del frontend
 
 ---
 
-## Instalación y ejecución
+## Requisitos
 
-### 1. Clonar el repositorio
+- Java 17 o superior
+- Maven 3.6 o superior
 
-```bash
-git clone <url-del-repositorio>
-cd control-finanzas
-```
+---
 
-### 2. Ejecutar el backend
+## Ejecución local
 
-```bash
+### 1. Clonar repositorio
+
+git clone https://github.com/dyepes-udea/FinanzasP-EBV16.git  
+cd FinanzasP-EBV16
+
+### 2. Ejecutar aplicación
+
 mvn spring-boot:run
-```
 
-O con el wrapper de Maven:
+### 3. Acceso en navegador
 
-```bash
-./mvn spring-boot:run  # Linux / macOS
-mvn spring-boot:run # Windows
-```
-
-### 3. Abrir la aplicación
-
-Una vez iniciado, abre el navegador en:
-
-```
 http://localhost:8080
-```
 
 ---
 
-## Endpoints de la API REST
+## API REST
 
-### Gastos — `/api/gastos`
+### Gastos (/api/gastos)
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/gastos` | Listar todos los gastos (ordenados por fecha desc) |
-| POST | `/api/gastos` | Crear un nuevo gasto |
-| DELETE | `/api/gastos/{id}` | Eliminar un gasto por ID |
+| Método | Endpoint |
+|--------|--------|
+| GET | /api/gastos |
+| POST | /api/gastos |
+| DELETE | /api/gastos/{id} |
 
-### Ingresos — `/api/ingresos`
+Ejemplo:
 
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/ingresos` | Listar todos los ingresos (ordenados por fecha desc) |
-| POST | `/api/ingresos` | Crear un nuevo ingreso |
-| DELETE | `/api/ingresos/{id}` | Eliminar un ingreso por ID |
-
-### Ejemplo de cuerpo para POST
-
-```json
 {
-  "descripcion": "Salario mensual",
-  "monto": 3500000.00,
-  "fecha": "2026-04-07",
-  "categoria": "Salario"
+  "descripcion": "Cerveza",
+  "monto": 20000,
+  "fecha": "2026-05-05",
+  "categoriaId": 1
 }
-```
 
 ---
 
-### Consola H2 (inspección en tiempo real)
+### Ingresos (/api/ingresos)
 
-Con el servidor corriendo, accede a:
+| Método | Endpoint |
+|--------|--------|
+| GET | /api/ingresos |
+| POST | /api/ingresos |
+| DELETE | /api/ingresos/{id} |
 
-```
+Ejemplo:
+
+{
+  "descripcion": "Trabajo freelance",
+  "monto": 500000,
+  "fecha": "2026-05-05",
+  "fuenteIngresoId": 2
+}
+
+---
+
+### Categorías (/api/categorias)
+
+| Método | Endpoint |
+|--------|--------|
+| GET | /api/categorias |
+| POST | /api/categorias |
+| PATCH | /api/categorias/{id} |
+| DELETE | /api/categorias/{id} |
+
+Notas:
+- Solo se permiten categorías de tipo GASTO
+- El tipo se valida en backend
+
+---
+
+### Fuentes de ingreso (/api/fuentes-ingreso)
+
+| Método | Endpoint |
+|--------|--------|
+| GET | /api/fuentes-ingreso |
+| POST | /api/fuentes-ingreso |
+| PATCH | /api/fuentes-ingreso/{id} |
+| DELETE | /api/fuentes-ingreso/{id} |
+
+---
+
+## Lógica del sistema
+
+- Los gastos requieren categoría
+- Los ingresos no usan categoría
+- Los ingresos requieren fuenteIngresoId
+- Las categorías son únicamente de tipo GASTO
+- Las validaciones se realizan en backend
+
+---
+
+## Base de datos (H2)
+
+Acceso:
+
 http://localhost:8080/h2-console
-```
 
-Usa los datos de conexión de la tabla anterior.
+Configuración:
+
+| Campo | Valor |
+|------|------|
+| JDBC URL | jdbc:h2:mem:testdb |
+| User | sa |
+| Password | (vacío) |
 
 ---
 
 ## Estructura del proyecto
 
-```
-control-finanzas/
-├── pom.xml
-└── src/
-    └── main/
-        ├── java/com/finanzas/
-        │   ├── ControlFinanzasApplication.java   # Clase principal
-        │   ├── controller/
-        │   │   ├── GastoController.java           # Endpoints /api/gastos
-        │   │   └── IngresoController.java         # Endpoints /api/ingresos
-        │   ├── entity/
-        │   │   ├── Gasto.java                     # Entidad JPA gastos
-        │   │   └── Ingreso.java                   # Entidad JPA ingresos
-        │   └── repository/
-        │       ├── GastoRepository.java           # Repositorio JPA gastos
-        │       └── IngresoRepository.java         # Repositorio JPA ingresos
-        └── resources/
-            ├── application.properties             # Configuración de la app
-            └── static/
-                └── index.html                     # Frontend React (CDN)
-```
+src/
+ └── main/
+     ├── java/com/finanzas/
+     │   ├── controller/
+     │   │   ├── GastoController.java
+     │   │   ├── IngresoController.java
+     │   │   ├── CategoriaController.java
+     │   │   └── FuenteIngresoController.java
+     │   ├── entity/
+     │   ├── repository/
+     │   └── dto/
+     └── resources/
+         ├── application.properties
+         └── static/
+             ├── index.html
+             ├── admin.html
+             ├── admin-fuentes.html
+             └── js/
 
 ---
 
+## Despliegue en Render
 
+Build:
+
+mvn clean install
+
+Start:
+
+java -jar target/*.jar
+
+---
+
+## Notas
+
+- No requiere Node.js
+- El frontend se sirve desde Spring Boot
+- La base de datos es en memoria
+- Para producción se recomienda usar una base de datos persistente
+
+---
+
+## Autor
+
+Proyecto académico — CodeFactory 2026-1
