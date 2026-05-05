@@ -1,3 +1,5 @@
+const API = '/api';
+
 function showMessage(msg, isError) {
   const el = document.getElementById('message');
   el.textContent = msg;
@@ -311,7 +313,7 @@ function showInputModal({ title, label, initialValue = '', submitText = 'Aceptar
 
 async function fetchCategories() {
   try {
-    const res = await fetch('/api/categorias');
+    const res = await fetch(`${API}/categorias`);
     if (!res.ok) throw new Error('No se pudo obtener categorías');
     const data = await res.json();
     renderCategories(data);
@@ -393,7 +395,7 @@ async function editCategory(cat) {
       return;
     }
 
-    const res = await fetch(`/api/categorias/${cat.id}`, {
+    const res = await fetch(`${API}/categorias/${cat.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -413,7 +415,7 @@ async function editCategory(cat) {
 
 async function deleteCategory(cat) {
   try {
-    const refRes = await fetch(`/api/categorias/${cat.id}/referencias`);
+    const refRes = await fetch(`${API}/categorias/${cat.id}/referencias`);
     if (!refRes.ok) throw new Error('No se pudo obtener información de referencias');
     const info = await refRes.json();
 
@@ -425,7 +427,7 @@ async function deleteCategory(cat) {
         confirmText: 'Eliminar'
       });
       if (!confirmado) return;
-      const res = await fetch(`/api/categorias/${cat.id}`, { method: 'DELETE' });
+      const res = await fetch(`${API}/categorias/${cat.id}`, { method: 'DELETE' });
       if (res.status === 204) { showMessage('Categoría eliminada'); fetchCategories(); }
       else { showMessage('Error eliminando categoría', true); }
       return;
@@ -448,7 +450,7 @@ async function deleteCategory(cat) {
         label: 'ID de categoria destino'
       });
       if (!target) return;
-      const res = await fetch(`/api/categorias/${cat.id}/eliminar`, {
+      const res = await fetch(`${API}/categorias/${cat.id}/eliminar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ confirmar: true, reasignarCategoriaId: parseInt(target,10) })
@@ -465,7 +467,7 @@ async function deleteCategory(cat) {
         confirmText: 'Eliminar transacciones'
       });
       if (!confirmado) return;
-      const res = await fetch(`/api/categorias/${cat.id}/eliminar`, {
+      const res = await fetch(`${API}/categorias/${cat.id}/eliminar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ confirmar: true, eliminarTransacciones: true })
@@ -488,7 +490,7 @@ async function createCategory(event) {
     const tipo = 'GASTO';
     if (!nombre) { showMessage('El nombre es obligatorio', true); return; }
 
-    const res = await fetch('/api/categorias', {
+    const res = await fetch(`${API}/categorias`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nombre, descripcion, tipo })
