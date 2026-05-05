@@ -76,6 +76,131 @@ function showConfirmModal({ title, message, itemName, confirmText = 'Confirmar',
   });
 }
 
+function showFormModal({ title, values, submitText = 'Guardar', cancelText = 'Cancelar' }) {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.42);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;';
+
+    const modal = document.createElement('form');
+    modal.style.cssText = 'width:100%;max-width:460px;background:#fff;border-radius:10px;box-shadow:0 18px 45px rgba(15,23,42,.28);padding:24px;color:#2c3e50;';
+
+    const heading = document.createElement('h3');
+    heading.textContent = title;
+    heading.style.cssText = 'margin:0 0 18px;font-size:1.25rem;color:#2c3e50;';
+
+    const nombreLabel = document.createElement('label');
+    nombreLabel.textContent = 'Nombre';
+    nombreLabel.style.cssText = 'display:block;margin-bottom:6px;font-weight:700;';
+    const nombreInput = document.createElement('input');
+    nombreInput.type = 'text';
+    nombreInput.required = true;
+    nombreInput.value = values.nombre || '';
+    nombreInput.style.cssText = 'width:100%;padding:12px;border:1px solid #bdc3c7;border-radius:4px;font:inherit;margin-bottom:14px;';
+
+    const descripcionLabel = document.createElement('label');
+    descripcionLabel.textContent = 'Descripcion';
+    descripcionLabel.style.cssText = 'display:block;margin-bottom:6px;font-weight:700;';
+    const descripcionInput = document.createElement('input');
+    descripcionInput.type = 'text';
+    descripcionInput.value = values.descripcion || '';
+    descripcionInput.style.cssText = 'width:100%;padding:12px;border:1px solid #bdc3c7;border-radius:4px;font:inherit;margin-bottom:20px;';
+
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.textContent = cancelText;
+    cancelButton.style.cssText = 'padding:10px 14px;border:1px solid #bdc3c7;background:#fff;color:#2c3e50;border-radius:4px;cursor:pointer;font-weight:600;';
+
+    const submitButton = document.createElement('button');
+    submitButton.type = 'submit';
+    submitButton.textContent = submitText;
+    submitButton.style.cssText = 'padding:10px 14px;border:1px solid #4a90e2;background:#4a90e2;color:#fff;border-radius:4px;cursor:pointer;font-weight:700;';
+
+    const close = result => {
+      overlay.remove();
+      resolve(result);
+    };
+
+    cancelButton.addEventListener('click', () => close(null));
+    overlay.addEventListener('click', event => {
+      if (event.target === overlay) close(null);
+    });
+    modal.addEventListener('submit', event => {
+      event.preventDefault();
+      const nombre = nombreInput.value.trim();
+      if (!nombre) {
+        nombreInput.focus();
+        return;
+      }
+      close({
+        nombre,
+        descripcion: descripcionInput.value.trim()
+      });
+    });
+
+    actions.append(cancelButton, submitButton);
+    modal.append(heading, nombreLabel, nombreInput, descripcionLabel, descripcionInput, actions);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    nombreInput.focus();
+  });
+}
+
+function showDeleteOptionsModal({ title, message, options, cancelText = 'Cancelar' }) {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.42);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;';
+
+    const modal = document.createElement('div');
+    modal.style.cssText = 'width:100%;max-width:460px;background:#fff;border-radius:10px;box-shadow:0 18px 45px rgba(15,23,42,.28);padding:24px;color:#2c3e50;';
+
+    const heading = document.createElement('h3');
+    heading.textContent = title;
+    heading.style.cssText = 'margin:0 0 10px;font-size:1.25rem;color:#2c3e50;';
+
+    const text = document.createElement('p');
+    text.textContent = message;
+    text.style.cssText = 'margin:0 0 18px;color:#5f6f7f;line-height:1.4;';
+
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;';
+
+    const close = result => {
+      overlay.remove();
+      resolve(result);
+    };
+
+    options.forEach(option => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = option.label;
+      button.style.cssText = option.danger
+        ? 'padding:10px 14px;border:1px solid #c0392b;background:#e74c3c;color:#fff;border-radius:4px;cursor:pointer;font-weight:700;'
+        : 'padding:10px 14px;border:1px solid #4a90e2;background:#4a90e2;color:#fff;border-radius:4px;cursor:pointer;font-weight:700;';
+      button.addEventListener('click', () => close(option.value));
+      actions.appendChild(button);
+    });
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.textContent = cancelText;
+    cancelButton.style.cssText = 'padding:10px 14px;border:1px solid #bdc3c7;background:#fff;color:#2c3e50;border-radius:4px;cursor:pointer;font-weight:600;';
+    cancelButton.addEventListener('click', () => close(null));
+
+    overlay.addEventListener('click', event => {
+      if (event.target === overlay) close(null);
+    });
+
+    actions.appendChild(cancelButton);
+    modal.append(heading, text, actions);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    cancelButton.focus();
+  });
+}
+
 async function fetchFuentes() {
   try {
     const res = await fetch('/api/fuentes-ingreso');
@@ -124,14 +249,18 @@ function renderFuentes(items) {
 
 async function editFuente(fuente) {
   try {
-    const nombre = prompt('Nombre:', fuente.nombre);
-    if (nombre === null) return;
-    const descripcion = prompt('Descripción:', fuente.descripcion || '');
-    if (descripcion === null) return;
+    const values = await showFormModal({
+      title: 'Editar fuente de ingreso',
+      values: {
+        nombre: fuente.nombre,
+        descripcion: fuente.descripcion
+      }
+    });
+    if (!values) return;
 
     const body = {};
-    if (nombre !== fuente.nombre) body.nombre = nombre;
-    if (descripcion !== fuente.descripcion) body.descripcion = descripcion;
+    if (values.nombre !== fuente.nombre) body.nombre = values.nombre;
+    if (values.descripcion !== fuente.descripcion) body.descripcion = values.descripcion;
 
     if (Object.keys(body).length === 0) {
       showMessage('No hubo cambios');
@@ -177,9 +306,15 @@ async function deleteFuente(fuente) {
     }
 
     const total = (info.ingresosVinculados || 0);
-    const opt = prompt(`La fuente tiene ${total} ingresos vinculados. Escriba 'borrar' para eliminar ingresos y la fuente, o cancelar:`);
+    const opt = await showDeleteOptionsModal({
+      title: 'Fuente con ingresos',
+      message: `La fuente tiene ${total} ingresos vinculados. Elige que quieres hacer.`,
+      options: [
+        { label: 'Eliminar ingresos', value: 'borrar', danger: true }
+      ]
+    });
     if (!opt) return;
-    if (opt.toLowerCase() === 'borrar') {
+    if (opt === 'borrar') {
       const confirmado = await showConfirmModal({
         title: 'Eliminar ingresos vinculados',
         message: 'Esto eliminará los ingresos vinculados a:',
