@@ -190,6 +190,8 @@ Start:
 
 java -jar target/*.jar
 
+Nota: el archivo .jar se genera automáticamente dentro de la carpeta target al ejecutar mvn clean install.
+
 ---
 
 ## Notas
