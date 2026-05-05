@@ -3,22 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Administración de Categorías</title>
+  <title>Administración de Categorías de Gasto</title>
   <link rel="stylesheet" href="/css/admin.css">
 </head>
 <body>
   <div class="container">
-    <h1>Administración de Categorías</h1>
+    <h1>Administración de Categorías de Gasto</h1>
+    <a href="index.html" class="btn-volver">← Volver al inicio</a>
 
     <section class="panel" id="createPanel">
       <h2>Crear categoría</h2>
       <form id="createForm">
         <input id="newNombre" placeholder="Nombre" required />
         <input id="newDescripcion" placeholder="Descripción (opcional)" />
-        <select id="newTipo">
-          <option value="GASTO">GASTO</option>
-          <option value="INGRESO">INGRESO</option>
-        </select>
         <button type="submit">Crear</button>
       </form>
     </section>

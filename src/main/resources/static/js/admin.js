@@ -12,6 +12,70 @@ function escapeHtml(str = '') {
   })[s]);
 }
 
+async function getBackendErrorMessage(res, fallback) {
+  const text = await res.text().catch(() => '');
+  if (!text) return fallback;
+
+  try {
+    const err = JSON.parse(text);
+    return err.detalles || err.mensaje || text;
+  } catch (e) {
+    return text;
+  }
+}
+
+function showConfirmModal({ title, message, itemName, confirmText = 'Confirmar', cancelText = 'Cancelar' }) {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.42);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;';
+
+    const modal = document.createElement('div');
+    modal.style.cssText = 'width:100%;max-width:420px;background:#fff;border-radius:10px;box-shadow:0 18px 45px rgba(15,23,42,.28);padding:24px;color:#2c3e50;';
+
+    const heading = document.createElement('h3');
+    heading.textContent = title;
+    heading.style.cssText = 'margin:0 0 10px;font-size:1.25rem;color:#2c3e50;';
+
+    const text = document.createElement('p');
+    text.textContent = message;
+    text.style.cssText = 'margin:0 0 12px;color:#5f6f7f;line-height:1.4;';
+
+    const name = document.createElement('div');
+    name.textContent = itemName;
+    name.style.cssText = 'margin:0 0 20px;padding:12px;background:#f4f7fa;border:1px solid #dbe4ee;border-radius:6px;font-weight:700;';
+
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.textContent = cancelText;
+    cancelButton.style.cssText = 'padding:10px 14px;border:1px solid #bdc3c7;background:#fff;color:#2c3e50;border-radius:4px;cursor:pointer;font-weight:600;';
+
+    const confirmButton = document.createElement('button');
+    confirmButton.type = 'button';
+    confirmButton.textContent = confirmText;
+    confirmButton.style.cssText = 'padding:10px 14px;border:1px solid #c0392b;background:#e74c3c;color:#fff;border-radius:4px;cursor:pointer;font-weight:700;';
+
+    const close = result => {
+      overlay.remove();
+      resolve(result);
+    };
+
+    cancelButton.addEventListener('click', () => close(false));
+    confirmButton.addEventListener('click', () => close(true));
+    overlay.addEventListener('click', event => {
+      if (event.target === overlay) close(false);
+    });
+
+    actions.append(cancelButton, confirmButton);
+    modal.append(heading, text, name, actions);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    cancelButton.focus();
+  });
+}
+
 async function fetchCategories() {
   try {
     const res = await fetch('/api/categorias');
@@ -26,10 +90,14 @@ async function fetchCategories() {
 function renderCategories(items) {
   const body = document.getElementById('categoriesBody');
   body.innerHTML = '';
-  items.forEach(cat => {
+  if (items.length === 0) {
+    body.innerHTML = '<tr><td colspan="5" class="empty">No hay categorías de gasto, crea una</td></tr>';
+    return;
+  }
+  items.forEach((cat, index) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${cat.id}</td>
+      <td>${index + 1}</td>
       <td>${escapeHtml(cat.nombre || '')}</td>
       <td>${escapeHtml(cat.descripcion || '')}</td>
       <td>${escapeHtml(cat.tipo || '')}</td>
@@ -107,7 +175,13 @@ async function deleteCategory(cat) {
     const info = await refRes.json();
 
     if (info.puedeEliminar) {
-      if (!confirm(`Eliminar categoría "${cat.nombre}"?`)) return;
+      const confirmado = await showConfirmModal({
+        title: 'Eliminar categoría',
+        message: 'Se eliminará la categoría:',
+        itemName: cat.nombre,
+        confirmText: 'Eliminar'
+      });
+      if (!confirmado) return;
       const res = await fetch(`/api/categorias/${cat.id}`, { method: 'DELETE' });
       if (res.status === 204) { showMessage('Categoría eliminada'); fetchCategories(); }
       else { showMessage('Error eliminando categoría', true); }
@@ -131,7 +205,13 @@ async function deleteCategory(cat) {
       return;
     }
     if (opt.toLowerCase() === 'borrar') {
-      if (!confirm('Esto eliminará las transacciones vinculadas. Confirmar?')) return;
+      const confirmado = await showConfirmModal({
+        title: 'Eliminar transacciones vinculadas',
+        message: 'Esto eliminará las transacciones vinculadas a:',
+        itemName: cat.nombre,
+        confirmText: 'Eliminar transacciones'
+      });
+      if (!confirmado) return;
       const res = await fetch(`/api/categorias/${cat.id}/eliminar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -152,7 +232,7 @@ async function createCategory(event) {
   try {
     const nombre = document.getElementById('newNombre').value.trim();
     const descripcion = document.getElementById('newDescripcion').value.trim();
-    const tipo = document.getElementById('newTipo').value;
+    const tipo = 'GASTO';
     if (!nombre) { showMessage('El nombre es obligatorio', true); return; }
 
     const res = await fetch('/api/categorias', {
@@ -166,7 +246,7 @@ async function createCategory(event) {
       document.getElementById('createForm').reset();
       fetchCategories();
     } else {
-      const err = await res.json().catch(()=>({}));
+      const err = { detalles: await getBackendErrorMessage(res, 'Error creando categoria') };
       showMessage(err.detalles||err.mensaje||'Error creando categoría', true);
     }
   } catch (err) {

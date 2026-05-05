@@ -1,11 +1,11 @@
 package com.finanzas.controller;
 
-import com.finanzas.entity.Ingreso;
-import com.finanzas.entity.Categoria;
 import com.finanzas.dto.IngresoCreacionDTO;
-import com.finanzas.repository.IngresoRepository;
+import com.finanzas.entity.FuenteIngreso;
+import com.finanzas.entity.Ingreso;
 import com.finanzas.repository.CategoriaRepository;
 import com.finanzas.repository.FuenteIngresoRepository;
+import com.finanzas.repository.IngresoRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +24,7 @@ public class IngresoController {
     private final CategoriaRepository categoriaRepository;
     private final FuenteIngresoRepository fuenteRepository;
 
-    public IngresoController(IngresoRepository ingresoRepository, CategoriaRepository categoriaRepository, 
+    public IngresoController(IngresoRepository ingresoRepository, CategoriaRepository categoriaRepository,
                            FuenteIngresoRepository fuenteRepository) {
         this.ingresoRepository = ingresoRepository;
         this.categoriaRepository = categoriaRepository;
@@ -40,25 +40,22 @@ public class IngresoController {
     }
 
     @PostMapping
-    public ResponseEntity<Ingreso> crear(@Valid @RequestBody IngresoCreacionDTO dto) {
-        // Validar que la categoría existe
-        Optional<Categoria> categoriaOpt = categoriaRepository.findById(dto.getCategoriaId());
-        if (categoriaOpt.isEmpty()) {
+    public ResponseEntity<?> crear(@RequestBody IngresoCreacionDTO dto) {
+        if (dto.getFuenteIngresoId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La fuente de ingreso es obligatoria");
+        }
+
+        Optional<FuenteIngreso> fuenteOpt = fuenteRepository.findById(dto.getFuenteIngresoId());
+        if (fuenteOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        // Crear el ingreso con la categoría
         Ingreso ingreso = new Ingreso();
         ingreso.setDescripcion(dto.getDescripcion());
         ingreso.setMonto(BigDecimal.valueOf(dto.getMonto()));
         ingreso.setFecha(dto.getFecha());
-        ingreso.setCategoria(categoriaOpt.get());
-
-        // Asignar fuente de ingreso si se proporciona
-        if (dto.getFuenteIngresoId() != null) {
-            var fuenteOpt = fuenteRepository.findById(dto.getFuenteIngresoId());
-            fuenteOpt.ifPresent(ingreso::setFuenteIngreso);
-        }
+        ingreso.setCategoria(null);
+        ingreso.setFuenteIngreso(fuenteOpt.get());
 
         Ingreso guardado = ingresoRepository.save(ingreso);
         return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
@@ -72,26 +69,29 @@ public class IngresoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Ingreso> actualizar(@PathVariable Long id, @Valid @RequestBody Ingreso ingresoActualizado) {
-        return ingresoRepository.findById(id)
-                .map(ingreso -> {
-                    // Validar que la categoría existe
-                    if (ingresoActualizado.getCategoria() == null || ingresoActualizado.getCategoria().getId() == null) {
-                        throw new IllegalArgumentException("La categoría es obligatoria");
-                    }
-                    
-                    if (!categoriaRepository.existsById(ingresoActualizado.getCategoria().getId())) {
-                        throw new IllegalArgumentException("La categoría especificada no existe");
-                    }
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @Valid @RequestBody Ingreso ingresoActualizado) {
+        Optional<Ingreso> ingresoOpt = ingresoRepository.findById(id);
+        if (ingresoOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-                    ingreso.setDescripcion(ingresoActualizado.getDescripcion());
-                    ingreso.setMonto(ingresoActualizado.getMonto());
-                    ingreso.setFecha(ingresoActualizado.getFecha());
-                    ingreso.setCategoria(ingresoActualizado.getCategoria());
+        if (ingresoActualizado.getFuenteIngreso() == null || ingresoActualizado.getFuenteIngreso().getId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La fuente de ingreso es obligatoria");
+        }
 
-                    return ResponseEntity.ok(ingresoRepository.save(ingreso));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        Optional<FuenteIngreso> fuenteOpt = fuenteRepository.findById(ingresoActualizado.getFuenteIngreso().getId());
+        if (fuenteOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Ingreso ingreso = ingresoOpt.get();
+        ingreso.setDescripcion(ingresoActualizado.getDescripcion());
+        ingreso.setMonto(ingresoActualizado.getMonto());
+        ingreso.setFecha(ingresoActualizado.getFecha());
+        ingreso.setCategoria(null);
+        ingreso.setFuenteIngreso(fuenteOpt.get());
+
+        return ResponseEntity.ok(ingresoRepository.save(ingreso));
     }
 
     @DeleteMapping("/{id}")

@@ -16,7 +16,7 @@ public class Ingreso {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "La descripción es obligatoria")
+    @NotBlank(message = "La descripcion es obligatoria")
     private String descripcion;
 
     @NotNull(message = "El monto es obligatorio")
@@ -27,12 +27,12 @@ public class Ingreso {
     private LocalDate fecha;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "categoria_id", nullable = false)
-    @NotNull(message = "La categoría es obligatoria")
+    @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "fuente_ingreso_id")
+    @JoinColumn(name = "fuente_ingreso_id", nullable = false)
+    @NotNull(message = "La fuente de ingreso es obligatoria")
     private FuenteIngreso fuenteIngreso;
 
     public Ingreso() {}

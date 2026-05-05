@@ -19,11 +19,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/categorias")
 @CrossOrigin(origins = "*")
 public class CategoriaController {
+
+    private static final Pattern NOMBRE_CATEGORIA_PERMITIDO = Pattern.compile("^[\\p{L}\\p{N} _\\-()\\/]+$");
 
     private final CategoriaRepository categoriaRepository;
     private final GastoRepository gastoRepository;
@@ -39,7 +42,7 @@ public class CategoriaController {
 
     @GetMapping
     public List<Categoria> listar() {
-        return categoriaRepository.findAll();
+        return categoriaRepository.findByTipoOrderByNombre(TipoCategoria.GASTO);
     }
 
     @GetMapping("/tipo/{tipo}")
@@ -58,13 +61,50 @@ public class CategoriaController {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@Valid @RequestBody Categoria categoria) {
-        // Validar que no exista una categoría con el mismo nombre
-        if (categoriaRepository.findByNombre(categoria.getNombre()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ErrorResponseDTO(409, "Nombre duplicado", 
-                            "Ya existe una categoría con el nombre '" + categoria.getNombre() + "'"));
+    public ResponseEntity<?> crear(@RequestBody Categoria categoria) {
+        if (categoria == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Categoria invalida", "Debe enviar los datos de la categoria"));
         }
+
+        String nombre = categoria.getNombre();
+        if (nombre == null || nombre.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Nombre invalido", "El nombre es obligatorio"));
+        }
+
+        nombre = nombre.trim();
+        if (nombre.length() > 50) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Nombre invalido", "El nombre no puede superar 50 caracteres"));
+        }
+
+        if (!NOMBRE_CATEGORIA_PERMITIDO.matcher(nombre).matches()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Nombre invalido",
+                            "El nombre solo puede contener letras, numeros, espacios, -, _, (), /"));
+        }
+
+        if (categoria.getTipo() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Tipo invalido", "El tipo de categoria es obligatorio"));
+        }
+
+        if (categoria.getTipo() != TipoCategoria.GASTO) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Tipo invalido", "Solo se permiten categorías de tipo GASTO"));
+        }
+
+        final String nombreFinal = nombre;
+        boolean existeMismoNombreYTipo = categoriaRepository.findByTipo(categoria.getTipo()).stream()
+                .anyMatch(c -> c.getNombre() != null && c.getNombre().equalsIgnoreCase(nombreFinal));
+        if (existeMismoNombreYTipo) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Categoria duplicada",
+                            "Ya existe una categoria con el nombre '" + nombre + "' y tipo " + categoria.getTipo()));
+        }
+
+        categoria.setNombre(nombre);
         Categoria guardada = categoriaRepository.save(categoria);
         return ResponseEntity.status(HttpStatus.CREATED).body(guardada);
     }

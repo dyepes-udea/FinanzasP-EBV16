@@ -14,11 +14,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/fuentes-ingreso")
 @CrossOrigin(origins = "*")
 public class FuenteIngresoController {
+
+    private static final Pattern NOMBRE_FUENTE_PERMITIDO = Pattern.compile("^[\\p{L}\\p{N} _\\-()\\/]+$");
 
     private final FuenteIngresoRepository fuenteRepository;
     private final IngresoRepository ingresoRepository;
@@ -45,12 +48,37 @@ public class FuenteIngresoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@Valid @RequestBody FuenteIngreso fuente) {
-        if (fuenteRepository.findByNombre(fuente.getNombre()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ErrorResponseDTO(409, "Nombre duplicado", 
-                            "Ya existe una fuente con el nombre '" + fuente.getNombre() + "'"));
+    public ResponseEntity<?> crear(@RequestBody FuenteIngreso fuente) {
+        if (fuente == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Fuente invalida", "Debe enviar los datos de la fuente de ingreso"));
         }
+
+        String nombre = fuente.getNombre();
+        if (nombre == null || nombre.trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Nombre invalido", "El nombre es obligatorio"));
+        }
+
+        nombre = nombre.trim();
+        if (nombre.length() > 50) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Nombre invalido", "El nombre no puede superar 50 caracteres"));
+        }
+
+        if (!NOMBRE_FUENTE_PERMITIDO.matcher(nombre).matches()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Nombre invalido",
+                            "El nombre solo puede contener letras, numeros, espacios, -, _, (), /"));
+        }
+
+        if (fuenteRepository.findByNombre(nombre).isPresent()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Fuente duplicada",
+                            "Ya existe una fuente de ingreso con el nombre '" + nombre + "'"));
+        }
+
+        fuente.setNombre(nombre);
         FuenteIngreso guardada = fuenteRepository.save(fuente);
         return ResponseEntity.status(HttpStatus.CREATED).body(guardada);
     }
@@ -173,7 +201,7 @@ public class FuenteIngresoController {
         }
 
         FuenteIngreso fuente = fuenteExistente.get();
-        long ingresosVinculados = ingresoRepository.countByCategoria_Id(id);
+        long ingresosVinculados = ingresoRepository.countByFuenteIngreso_Id(id);
 
         InfoEliminacionFuenteDTO info = new InfoEliminacionFuenteDTO(id, fuente.getNombre(), ingresosVinculados);
         return ResponseEntity.ok(info);
@@ -190,7 +218,7 @@ public class FuenteIngresoController {
         }
 
         FuenteIngreso fuente = fuenteExistente.get();
-        long ingresosVinculados = ingresoRepository.countByCategoria_Id(id);
+        long ingresosVinculados = ingresoRepository.countByFuenteIngreso_Id(id);
 
         if (ingresosVinculados == 0) {
             fuenteRepository.deleteById(id);
@@ -225,7 +253,7 @@ public class FuenteIngresoController {
         }
 
         FuenteIngreso fuente = fuenteExistente.get();
-        long ingresosVinculados = ingresoRepository.countByCategoria_Id(id);
+        long ingresosVinculados = ingresoRepository.countByFuenteIngreso_Id(id);
 
         if (ingresosVinculados > 0) {
             return ResponseEntity.status(HttpStatus.CONFLICT)

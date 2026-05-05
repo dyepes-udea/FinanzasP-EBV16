@@ -1,10 +1,11 @@
 package com.finanzas.controller;
 
-import com.finanzas.entity.Gasto;
-import com.finanzas.entity.Categoria;
 import com.finanzas.dto.GastoCreacionDTO;
-import com.finanzas.repository.GastoRepository;
+import com.finanzas.entity.Categoria;
+import com.finanzas.entity.Gasto;
+import com.finanzas.entity.TipoCategoria;
 import com.finanzas.repository.CategoriaRepository;
+import com.finanzas.repository.GastoRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,19 +37,22 @@ public class GastoController {
     }
 
     @PostMapping
-    public ResponseEntity<Gasto> crear(@Valid @RequestBody GastoCreacionDTO dto) {
-        // Validar que la categoría existe
+    public ResponseEntity<?> crear(@Valid @RequestBody GastoCreacionDTO dto) {
         Optional<Categoria> categoriaOpt = categoriaRepository.findById(dto.getCategoriaId());
         if (categoriaOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        // Crear el gasto con la categoría
+        Categoria categoria = categoriaOpt.get();
+        if (categoria.getTipo() != TipoCategoria.GASTO) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La categoria debe ser de tipo GASTO");
+        }
+
         Gasto gasto = new Gasto();
         gasto.setDescripcion(dto.getDescripcion());
         gasto.setMonto(BigDecimal.valueOf(dto.getMonto()));
         gasto.setFecha(dto.getFecha());
-        gasto.setCategoria(categoriaOpt.get());
+        gasto.setCategoria(categoria);
 
         Gasto guardado = gastoRepository.save(gasto);
         return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
@@ -62,26 +66,33 @@ public class GastoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Gasto> actualizar(@PathVariable Long id, @Valid @RequestBody Gasto gastoActualizado) {
-        return gastoRepository.findById(id)
-                .map(gasto -> {
-                    // Validar que la categoría existe
-                    if (gastoActualizado.getCategoria() == null || gastoActualizado.getCategoria().getId() == null) {
-                        throw new IllegalArgumentException("La categoría es obligatoria");
-                    }
-                    
-                    if (!categoriaRepository.existsById(gastoActualizado.getCategoria().getId())) {
-                        throw new IllegalArgumentException("La categoría especificada no existe");
-                    }
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @Valid @RequestBody Gasto gastoActualizado) {
+        Optional<Gasto> gastoOpt = gastoRepository.findById(id);
+        if (gastoOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-                    gasto.setDescripcion(gastoActualizado.getDescripcion());
-                    gasto.setMonto(gastoActualizado.getMonto());
-                    gasto.setFecha(gastoActualizado.getFecha());
-                    gasto.setCategoria(gastoActualizado.getCategoria());
+        if (gastoActualizado.getCategoria() == null || gastoActualizado.getCategoria().getId() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La categoria es obligatoria");
+        }
 
-                    return ResponseEntity.ok(gastoRepository.save(gasto));
-                })
-                .orElse(ResponseEntity.notFound().build());
+        Optional<Categoria> categoriaOpt = categoriaRepository.findById(gastoActualizado.getCategoria().getId());
+        if (categoriaOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Categoria categoria = categoriaOpt.get();
+        if (categoria.getTipo() != TipoCategoria.GASTO) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La categoria debe ser de tipo GASTO");
+        }
+
+        Gasto gasto = gastoOpt.get();
+        gasto.setDescripcion(gastoActualizado.getDescripcion());
+        gasto.setMonto(gastoActualizado.getMonto());
+        gasto.setFecha(gastoActualizado.getFecha());
+        gasto.setCategoria(categoria);
+
+        return ResponseEntity.ok(gastoRepository.save(gasto));
     }
 
     @DeleteMapping("/{id}")

@@ -12,6 +12,70 @@ function escapeHtml(str = '') {
   })[s]);
 }
 
+async function getBackendErrorMessage(res, fallback) {
+  const text = await res.text().catch(() => '');
+  if (!text) return fallback;
+
+  try {
+    const err = JSON.parse(text);
+    return err.detalles || err.mensaje || text;
+  } catch (e) {
+    return text;
+  }
+}
+
+function showConfirmModal({ title, message, itemName, confirmText = 'Confirmar', cancelText = 'Cancelar' }) {
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.42);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;';
+
+    const modal = document.createElement('div');
+    modal.style.cssText = 'width:100%;max-width:420px;background:#fff;border-radius:10px;box-shadow:0 18px 45px rgba(15,23,42,.28);padding:24px;color:#2c3e50;';
+
+    const heading = document.createElement('h3');
+    heading.textContent = title;
+    heading.style.cssText = 'margin:0 0 10px;font-size:1.25rem;color:#2c3e50;';
+
+    const text = document.createElement('p');
+    text.textContent = message;
+    text.style.cssText = 'margin:0 0 12px;color:#5f6f7f;line-height:1.4;';
+
+    const name = document.createElement('div');
+    name.textContent = itemName;
+    name.style.cssText = 'margin:0 0 20px;padding:12px;background:#f4f7fa;border:1px solid #dbe4ee;border-radius:6px;font-weight:700;';
+
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex;gap:10px;justify-content:flex-end;';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.textContent = cancelText;
+    cancelButton.style.cssText = 'padding:10px 14px;border:1px solid #bdc3c7;background:#fff;color:#2c3e50;border-radius:4px;cursor:pointer;font-weight:600;';
+
+    const confirmButton = document.createElement('button');
+    confirmButton.type = 'button';
+    confirmButton.textContent = confirmText;
+    confirmButton.style.cssText = 'padding:10px 14px;border:1px solid #c0392b;background:#e74c3c;color:#fff;border-radius:4px;cursor:pointer;font-weight:700;';
+
+    const close = result => {
+      overlay.remove();
+      resolve(result);
+    };
+
+    cancelButton.addEventListener('click', () => close(false));
+    confirmButton.addEventListener('click', () => close(true));
+    overlay.addEventListener('click', event => {
+      if (event.target === overlay) close(false);
+    });
+
+    actions.append(cancelButton, confirmButton);
+    modal.append(heading, text, name, actions);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    cancelButton.focus();
+  });
+}
+
 async function fetchFuentes() {
   try {
     const res = await fetch('/api/fuentes-ingreso');
@@ -99,7 +163,13 @@ async function deleteFuente(fuente) {
     const info = await refRes.json();
 
     if (info.puedeEliminar) {
-      if (!confirm(`Eliminar fuente "${fuente.nombre}"?`)) return;
+      const confirmado = await showConfirmModal({
+        title: 'Eliminar fuente de ingreso',
+        message: 'Se eliminará la fuente de ingreso:',
+        itemName: fuente.nombre,
+        confirmText: 'Eliminar'
+      });
+      if (!confirmado) return;
       const res = await fetch(`/api/fuentes-ingreso/${fuente.id}`, { method: 'DELETE' });
       if (res.status === 204) { showMessage('Fuente de ingreso eliminada'); fetchFuentes(); }
       else { showMessage('Error eliminando fuente', true); }
@@ -110,7 +180,13 @@ async function deleteFuente(fuente) {
     const opt = prompt(`La fuente tiene ${total} ingresos vinculados. Escriba 'borrar' para eliminar ingresos y la fuente, o cancelar:`);
     if (!opt) return;
     if (opt.toLowerCase() === 'borrar') {
-      if (!confirm('Esto eliminará los ingresos vinculados. Confirmar?')) return;
+      const confirmado = await showConfirmModal({
+        title: 'Eliminar ingresos vinculados',
+        message: 'Esto eliminará los ingresos vinculados a:',
+        itemName: fuente.nombre,
+        confirmText: 'Eliminar ingresos'
+      });
+      if (!confirmado) return;
       const res = await fetch(`/api/fuentes-ingreso/${fuente.id}/eliminar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -144,7 +220,7 @@ async function createFuente(event) {
       document.getElementById('createForm').reset();
       fetchFuentes();
     } else {
-      const err = await res.json().catch(()=>({}));
+      const err = { detalles: await getBackendErrorMessage(res, 'Error creando fuente') };
       showMessage(err.detalles||err.mensaje||'Error creando fuente', true);
     }
   } catch (err) {
