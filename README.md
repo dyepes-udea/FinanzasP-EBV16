@@ -159,8 +159,6 @@ Configuración:
 
 ## Estructura del proyecto
 
-## Estructura del proyecto
-
 ```text
 src/
 └── main/
@@ -180,7 +178,7 @@ src/
             ├── admin.html
             ├── admin-fuentes.html
             └── js/
----
+```
 
 ## Despliegue en Render
 
