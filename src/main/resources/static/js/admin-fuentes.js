@@ -1,3 +1,5 @@
+const API = '/api';
+
 function showMessage(msg, isError) {
   const el = document.getElementById('message');
   el.textContent = msg;
@@ -203,7 +205,7 @@ function showDeleteOptionsModal({ title, message, options, cancelText = 'Cancela
 
 async function fetchFuentes() {
   try {
-    const res = await fetch('/api/fuentes-ingreso');
+    const res = await fetch(`${API}/fuentes-ingreso`);
     if (!res.ok) throw new Error('No se pudo obtener fuentes de ingreso');
     const data = await res.json();
     renderFuentes(data);
@@ -267,7 +269,7 @@ async function editFuente(fuente) {
       return;
     }
 
-    const res = await fetch(`/api/fuentes-ingreso/${fuente.id}`, {
+    const res = await fetch(`${API}/fuentes-ingreso/${fuente.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -287,7 +289,7 @@ async function editFuente(fuente) {
 
 async function deleteFuente(fuente) {
   try {
-    const refRes = await fetch(`/api/fuentes-ingreso/${fuente.id}/referencias`);
+    const refRes = await fetch(`${API}/fuentes-ingreso/${fuente.id}/referencias`);
     if (!refRes.ok) throw new Error('No se pudo obtener información de referencias');
     const info = await refRes.json();
 
@@ -299,7 +301,7 @@ async function deleteFuente(fuente) {
         confirmText: 'Eliminar'
       });
       if (!confirmado) return;
-      const res = await fetch(`/api/fuentes-ingreso/${fuente.id}`, { method: 'DELETE' });
+      const res = await fetch(`${API}/fuentes-ingreso/${fuente.id}`, { method: 'DELETE' });
       if (res.status === 204) { showMessage('Fuente de ingreso eliminada'); fetchFuentes(); }
       else { showMessage('Error eliminando fuente', true); }
       return;
@@ -322,7 +324,7 @@ async function deleteFuente(fuente) {
         confirmText: 'Eliminar ingresos'
       });
       if (!confirmado) return;
-      const res = await fetch(`/api/fuentes-ingreso/${fuente.id}/eliminar`, {
+      const res = await fetch(`${API}/fuentes-ingreso/${fuente.id}/eliminar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ confirmar: true, eliminarTransacciones: true })
@@ -344,7 +346,7 @@ async function createFuente(event) {
     const descripcion = document.getElementById('newDescripcion').value.trim();
     if (!nombre) { showMessage('El nombre es obligatorio', true); return; }
 
-    const res = await fetch('/api/fuentes-ingreso', {
+    const res = await fetch(`${API}/fuentes-ingreso`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nombre, descripcion })
