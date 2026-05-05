@@ -199,7 +199,6 @@ Nota: el archivo .jar se genera automáticamente dentro de la carpeta target al 
 - No requiere Node.js
 - El frontend se sirve desde Spring Boot
 - La base de datos es en memoria
-- Para producción se recomienda usar una base de datos persistente
 
 ---
 
