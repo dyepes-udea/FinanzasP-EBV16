@@ -159,25 +159,27 @@ Configuración:
 
 ## Estructura del proyecto
 
-src/
- └── main/
-     ├── java/com/finanzas/
-     │   ├── controller/
-     │   │   ├── GastoController.java
-     │   │   ├── IngresoController.java
-     │   │   ├── CategoriaController.java
-     │   │   └── FuenteIngresoController.java
-     │   ├── entity/
-     │   ├── repository/
-     │   └── dto/
-     └── resources/
-         ├── application.properties
-         └── static/
-             ├── index.html
-             ├── admin.html
-             ├── admin-fuentes.html
-             └── js/
+## Estructura del proyecto
 
+```text
+src/
+└── main/
+    ├── java/com/finanzas/
+    │   ├── controller/
+    │   │   ├── GastoController.java
+    │   │   ├── IngresoController.java
+    │   │   ├── CategoriaController.java
+    │   │   └── FuenteIngresoController.java
+    │   ├── entity/
+    │   ├── repository/
+    │   └── dto/
+    └── resources/
+        ├── application.properties
+        └── static/
+            ├── index.html
+            ├── admin.html
+            ├── admin-fuentes.html
+            └── js/
 ---
 
 ## Despliegue en Render
