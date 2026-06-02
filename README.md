@@ -479,18 +479,8 @@ Después del despliegue, Render genera una URL pública del servicio. Desde esa 
 - Los usuarios, transacciones, categorías personalizadas, fuentes personalizadas y referencias de foto pueden perderse al reiniciar o redeplegar el servicio.
 - Las imágenes subidas se guardan localmente en el proyecto durante la ejecución, pero la referencia queda en H2; al reiniciar, esa relación puede perderse.
 
----
 
-## Notas importantes
 
-- Proyecto académico con alcance simple.
-- No implementa Spring Security, JWT ni roles.
-- Las contraseñas se almacenan en texto plano por alcance académico; no se recomienda para producción.
-- La sesión visual se maneja en frontend con `localStorage`.
-- La separación de datos por usuario se realiza enviando `usuarioId` a los endpoints correspondientes.
-- H2 se usa en memoria; no hay persistencia real entre reinicios.
-- Las categorías y fuentes globales son creadas por inicialización del sistema y se comparten entre usuarios.
-- Las categorías y fuentes personalizadas pertenecen al usuario que las creó.
 
 ---
 
