@@ -105,29 +105,41 @@
 
     /* ── NAVIGATION ── */
     .nav-admin {
-      display: flex;
-      gap: 0.8rem;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.9rem;
       align-items: center;
-      justify-content: flex-start;
       background: rgba(255,255,255,0.78);
       border: 1px solid rgba(255,255,255,0.85);
       border-radius: 16px;
-      padding: 0.7rem;
+      padding: 0.75rem;
       margin-bottom: 1.5rem;
       box-shadow: 0 12px 30px rgba(31, 41, 55, 0.08);
-      flex-wrap: wrap;
       backdrop-filter: blur(12px);
     }
 
-    .nav-admin a {
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      min-width: 0;
+      padding-inline: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-admin a,
+    .auth-logout {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.4rem;
+      min-height: 2.75rem;
       background: #ffffff;
       color: #243447;
       border: 1px solid rgba(42, 157, 143, 0.28);
       border-radius: 12px;
-      padding: 0.75rem 1.05rem;
+      padding: 0.72rem 1rem;
       font-size: 0.92rem;
       font-weight: 750;
       cursor: pointer;
@@ -137,10 +149,95 @@
       box-shadow: 0 1px 0 rgba(17,24,39,0.04);
     }
 
-    .nav-admin a:hover {
+    .nav-admin a:hover,
+    .auth-logout:hover {
       background: #eef6ff;
       transform: translateY(-1px);
       box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+    }
+
+    .auth-status {
+      display: none;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.55rem;
+      min-height: 3.35rem;
+      background: rgba(255,255,255,0.96);
+      color: #243447;
+      border: 1px solid rgba(42, 157, 143, 0.24);
+      border-radius: 14px;
+      padding: 0.48rem 0.58rem 0.48rem 0.75rem;
+      box-shadow: 0 8px 22px rgba(31, 41, 55, 0.08);
+      min-width: min(100%, 30rem);
+    }
+
+    .auth-status.visible {
+      display: inline-flex;
+    }
+
+    .auth-avatar,
+    .auth-photo {
+      width: 2.15rem;
+      height: 2.15rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .auth-avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #2a9d8f;
+      color: #fff;
+      font-weight: 850;
+    }
+
+    .auth-photo {
+      object-fit: cover;
+      border: 1px solid rgba(42, 157, 143, 0.35);
+    }
+
+    .auth-text {
+      font-size: 0.86rem;
+      font-weight: 750;
+      overflow-wrap: anywhere;
+      line-height: 1.2;
+      max-width: 16rem;
+      color: #334155;
+    }
+
+    .auth-profile,
+    .auth-logout {
+      min-height: 2.35rem;
+      border-radius: 10px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      padding: 0.55rem 0.78rem;
+      white-space: nowrap;
+      box-shadow: none;
+    }
+
+    .auth-profile {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .auth-profile:hover {
+      background: #bae6fd;
+    }
+
+    .auth-logout {
+      background: #fee2e2;
+      color: #991b1b;
+      border-color: #fecaca;
+    }
+
+    .auth-logout:hover {
+      background: #fecaca;
+    }
+
+    .auth-link.oculto {
+      display: none;
     }
 
     /* ── SUMMARY CARDS ── */
@@ -354,17 +451,25 @@
     .badge-ingreso { background: #dcfce7; color: #15803d; }
     .badge-gasto   { background: #fee2e2; color: #b91c1c; }
 
+    .tx-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      flex-shrink: 0;
+    }
+
+    .tx-edit,
     .tx-del {
       background: none;
       border: none;
       color: #d1d5db;
       cursor: pointer;
-      font-size: 1rem;
+      font-size: 0.92rem;
       padding: 0 0.3rem;
-      margin-left: 0.5rem;
       transition: color 0.15s;
     }
 
+    .tx-edit:hover { color: #2563eb; }
     .tx-del:hover { color: #dc2626; }
 
     .empty-state {
@@ -458,6 +563,24 @@
     }
 
     .btn-guardar:hover { background: #2d2d50; }
+
+    .btn-cancelar-edicion {
+      display: none;
+      width: 100%;
+      padding: 0.72rem;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 0.65rem;
+    }
+
+    .btn-cancelar-edicion.visible {
+      display: block;
+    }
     .mensaje-app {
   display: none;
   position: fixed;
@@ -518,6 +641,20 @@
       }
       .filter-wrap { width: 100%; }
       .filter-wrap select { width: 100%; }
+      .nav-admin {
+        grid-template-columns: 1fr;
+      }
+      .auth-status {
+        justify-content: flex-start;
+        min-width: 0;
+        width: 100%;
+        flex-wrap: wrap;
+      }
+      .auth-text {
+        max-width: none;
+        flex: 1;
+        min-width: 12rem;
+      }
     }
   </style>
 </head>
@@ -526,8 +663,18 @@
 
   <!-- NAVIGATION -->
   <div class="nav-admin">
-    <a href="admin.html">📊 Administrar Categorías de Gasto</a>
-    <a href="admin-fuentes.html">💰 Administrar Fuentes de Ingreso</a>
+    <div class="nav-actions">
+      <a href="login.html" class="auth-link" id="linkLogin">Ingresar</a>
+      <a href="registro.html" class="auth-link" id="linkRegistro">Crear cuenta</a>
+      <a href="admin.html">📊 Administrar Categorías de Gasto</a>
+      <a href="admin-fuentes.html">💰 Administrar Fuentes de Ingreso</a>
+    </div>
+    <div class="auth-status" id="authStatus">
+      <span class="auth-avatar" id="authAvatar">?</span>
+      <span class="auth-text" id="authText"></span>
+      <a class="auth-profile" href="perfil.html">Mi perfil</a>
+      <button class="auth-logout" id="btnCerrarSesion" type="button">Cerrar sesión</button>
+    </div>
   </div>
 
   <!-- HEADER -->
@@ -597,7 +744,7 @@
 <div class="overlay" id="overlay" onclick="cerrarSiOverlay(event)">
   <div class="modal">
     <button class="modal-close" onclick="cerrarModal()">✕</button>
-    <h2>Agregar Transacción</h2>
+    <h2 id="modalTitulo">Agregar Transacción</h2>
     <form id="formTx" onsubmit="guardar(event)">
       <div class="form-group">
         <label>Tipo</label>
@@ -631,6 +778,7 @@
         <input type="date" id="fecha" required />
       </div>
       <button type="submit" class="btn-guardar">Guardar Transacción</button>
+      <button type="button" class="btn-cancelar-edicion" id="btnCancelarEdicion" onclick="cancelarEdicion()">Cancelar</button>
     </form>
   </div>
 </div>
@@ -643,6 +791,71 @@
 </div>
 <script>
   const API = '/api';
+  let usuarioActual = null;
+
+  function cargarEstadoSesion() {
+    const raw = localStorage.getItem('usuarioAutenticado');
+    if (!raw) {
+      window.location.href = 'login.html';
+      return false;
+    }
+
+    try {
+      const usuario = JSON.parse(raw);
+      if (!usuario || !usuario.id || !usuario.correo) {
+        localStorage.removeItem('usuarioAutenticado');
+        window.location.href = 'login.html';
+        return false;
+      }
+
+      usuarioActual = usuario;
+
+      const nombre = (usuario.nombre || '').trim();
+      const correo = usuario.correo;
+      const fotoUrl = (usuario.fotoUrl || '').trim();
+      const inicial = (nombre || correo || '?').charAt(0).toUpperCase();
+      const textoSesion = nombre ? `Sesión iniciada como ${nombre} (${correo})` : `Sesión iniciada como ${correo}`;
+      const authStatus = document.getElementById('authStatus');
+      const avatarActual = document.getElementById('authAvatar');
+
+      if (fotoUrl) {
+        const img = document.createElement('img');
+        img.className = 'auth-photo';
+        img.id = 'authAvatar';
+        img.src = fotoUrl;
+        img.alt = 'Foto de perfil';
+        img.onerror = () => {
+          const avatar = document.createElement('span');
+          avatar.className = 'auth-avatar';
+          avatar.id = 'authAvatar';
+          avatar.textContent = inicial;
+          img.replaceWith(avatar);
+        };
+        avatarActual.replaceWith(img);
+      } else {
+        avatarActual.textContent = inicial;
+      }
+
+      document.getElementById('authText').textContent = textoSesion;
+      authStatus.classList.add('visible');
+      document.getElementById('linkLogin').classList.add('oculto');
+      document.getElementById('linkRegistro').classList.add('oculto');
+      return true;
+    } catch (err) {
+      localStorage.removeItem('usuarioAutenticado');
+      window.location.href = 'login.html';
+      return false;
+    }
+  }
+
+  function cerrarSesion() {
+    localStorage.removeItem('usuarioAutenticado');
+    window.location.href = 'login.html';
+  }
+
+  document.getElementById('btnCerrarSesion').addEventListener('click', cerrarSesion);
+
+  const sesionActiva = cargarEstadoSesion();
 
   // Paleta de colores para avatares
   const COLORS = ['#6366f1','#f59e0b','#10b981','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f97316','#84cc16'];
@@ -662,11 +875,13 @@
   let todas = []; // { ...item, tipo: 'ingreso'|'gasto' }
   let categoriasGasto = [];
   let fuentesIngreso = [];
+  let transaccionEditando = null;
 
   // Cargar todas las categorías y filtrarlas por tipo
   async function cargarCategorias() {
     try {
-      const res = await fetch(`${API}/categorias`);
+      if (!usuarioActual) return;
+      const res = await fetch(`${API}/categorias?usuarioId=${usuarioActual.id}`);
       categoriasGasto = await res.json();
     } catch (err) {
       console.error('Error cargando categorías:', err);
@@ -676,7 +891,8 @@
   // Cargar fuentes de ingreso
   async function cargarFuentes() {
     try {
-      const res = await fetch(`${API}/fuentes-ingreso`);
+      if (!usuarioActual) return;
+      const res = await fetch(`${API}/fuentes-ingreso?usuarioId=${usuarioActual.id}`);
       fuentesIngreso = await res.json();
     } catch (err) {
       console.error('Error cargando fuentes:', err);
@@ -726,12 +942,21 @@
 
   // ────────────────────────────────────────────────────────────
   async function cargar() {
+    if (!usuarioActual) return;
+
     await Promise.all([cargarCategorias(), cargarFuentes()]);
     
     const [rI, rG] = await Promise.all([
-      fetch(`${API}/ingresos`),
-      fetch(`${API}/gastos`)
+      fetch(`${API}/ingresos?usuarioId=${usuarioActual.id}`),
+      fetch(`${API}/gastos?usuarioId=${usuarioActual.id}`)
     ]);
+
+    if (!rI.ok || !rG.ok) {
+      localStorage.removeItem('usuarioAutenticado');
+      window.location.href = 'login.html';
+      return;
+    }
+
     const ingresos = (await rI.json()).map(i => ({ ...i, tipo: 'ingreso' }));
     const gastos   = (await rG.json()).map(g => ({ ...g, tipo: 'gasto'   }));
 
@@ -758,9 +983,12 @@
 
     const items = todas.filter(t => {
       const matchTipo = filtro === 'todas' || t.tipo === filtro;
+      const categoriaTexto = typeof t.categoria === 'string' ? t.categoria : (t.categoria?.nombre || '');
+      const fuenteTexto = typeof t.fuenteIngreso === 'string' ? t.fuenteIngreso : (t.fuenteIngreso?.nombre || '');
       const matchText = !busq ||
         (t.descripcion || '').toLowerCase().includes(busq) ||
-        (t.categoria   || '').toLowerCase().includes(busq);
+        categoriaTexto.toLowerCase().includes(busq) ||
+        fuenteTexto.toLowerCase().includes(busq);
       return matchTipo && matchText;
     });
 
@@ -797,7 +1025,10 @@
             <div class="tx-amount ${amountClass}">${amountStr}</div>
             ${badge}
           </div>
-          <button class="tx-del" onclick="eliminar('${t.tipo}', ${t.id})">✕</button>
+          <div class="tx-actions">
+            <button class="tx-edit" onclick="editar('${t.tipo}', ${t.id})">Editar</button>
+            <button class="tx-del" onclick="eliminar('${t.tipo}', ${t.id})">✕</button>
+          </div>
         </div>`;
     }).join('');
   }
@@ -816,23 +1047,75 @@
 
   // ── Eliminar ─────────────────────────────────────────────────
   async function eliminar(tipo, id) {
+    if (!usuarioActual) {
+      window.location.href = 'login.html';
+      return;
+    }
+
     const endpoint = tipo === 'ingreso' ? 'ingresos' : 'gastos';
-    await fetch(`${API}/${endpoint}/${id}`, { method: 'DELETE' });
+    await fetch(`${API}/${endpoint}/${id}?usuarioId=${usuarioActual.id}`, { method: 'DELETE' });
     cargar();
   }
 
   // ── Modal ─────────────────────────────────────────────────────
   function abrirModal() {
+    limpiarModoEdicion();
     document.getElementById('formTx').reset();
-    document.getElementById('fecha').valueAsDate = new Date();    actualizarSelectores();    document.getElementById('overlay').classList.add('open');
+    document.getElementById('fecha').valueAsDate = new Date();
+    actualizarSelectores();
+    document.getElementById('overlay').classList.add('open');
   }
 
   function cerrarModal() {
     document.getElementById('overlay').classList.remove('open');
+    limpiarModoEdicion();
   }
 
   function cerrarSiOverlay(e) {
     if (e.target === document.getElementById('overlay')) cerrarModal();
+  }
+
+  function limpiarModoEdicion() {
+    transaccionEditando = null;
+    document.getElementById('modalTitulo').textContent = 'Agregar Transacción';
+    document.querySelector('.btn-guardar').textContent = 'Guardar Transacción';
+    document.getElementById('btnCancelarEdicion').classList.remove('visible');
+    document.getElementById('tipo').disabled = false;
+  }
+
+  function cancelarEdicion() {
+    cerrarModal();
+  }
+
+  function editar(tipo, id) {
+    const tx = todas.find(t => t.tipo === tipo && t.id === id);
+    if (!tx) {
+      mostrarMensaje('No se encontró la transacción para editar.');
+      return;
+    }
+
+    transaccionEditando = { tipo, id };
+    document.getElementById('formTx').reset();
+    document.getElementById('modalTitulo').textContent = 'Editar transacción';
+    document.querySelector('.btn-guardar').textContent = 'Guardar cambios';
+    document.getElementById('btnCancelarEdicion').classList.add('visible');
+
+    const tipoSelect = document.getElementById('tipo');
+    tipoSelect.value = tipo;
+    tipoSelect.disabled = true;
+    actualizarSelectores();
+
+    document.getElementById('desc').value = tx.descripcion || '';
+    document.getElementById('monto').value = tx.monto || '';
+    document.getElementById('fecha').value = tx.fecha || '';
+
+    if (tipo === 'gasto') {
+      document.getElementById('categoria').value = tx.categoria?.id || '';
+    } else {
+      document.getElementById('fuente').value = tx.fuenteIngreso?.id || '';
+    }
+
+    document.getElementById('overlay').classList.add('open');
   }
 function mostrarMensaje(texto) {
   document.getElementById('mensajeTexto').textContent = texto;
@@ -844,9 +1127,27 @@ function cerrarMensaje() {
 }
   async function guardar(e) {
     e.preventDefault();
-    const tipo = document.getElementById('tipo').value;
+    const tipo = transaccionEditando ? transaccionEditando.tipo : document.getElementById('tipo').value;
     const endpoint = tipo === 'ingreso' ? 'ingresos' : 'gastos';
     const categoriaId = document.getElementById('categoria').value;
+    const descripcion = document.getElementById('desc').value.trim();
+    const monto = document.getElementById('monto').value;
+    const fecha = document.getElementById('fecha').value;
+
+    if (!descripcion) {
+      mostrarMensaje('La descripción es obligatoria.');
+      return;
+    }
+
+    if (!monto || parseFloat(monto) <= 0) {
+      mostrarMensaje('El monto debe ser mayor que cero.');
+      return;
+    }
+
+    if (!fecha) {
+      mostrarMensaje('La fecha es obligatoria.');
+      return;
+    }
 
     if (tipo === 'gasto' && categoriasGasto.length === 0) {
       mostrarMensaje('No se puede crear el gasto porque no hay ninguna categoría de gasto definida. Primero crea una categoría de gasto.');
@@ -864,13 +1165,21 @@ function cerrarMensaje() {
     }
 
     const body = {
-      descripcion: document.getElementById('desc').value,
-      monto: document.getElementById('monto').value,
-      fecha: document.getElementById('fecha').value
+      descripcion,
+      monto,
+      fecha
     };
 
+    if (!transaccionEditando) {
+      body.usuarioId = usuarioActual.id;
+    }
+
     if (tipo === 'gasto') {
-      body.categoriaId = parseInt(categoriaId, 10);
+      if (transaccionEditando) {
+        body.categoria = { id: parseInt(categoriaId, 10) };
+      } else {
+        body.categoriaId = parseInt(categoriaId, 10);
+      }
     }
 
     // Agregar fuenteIngresoId si es ingreso
@@ -881,22 +1190,41 @@ function cerrarMensaje() {
         return;
       }
       if (fuenteId) {
-        body.fuenteIngresoId = parseInt(fuenteId, 10);
+        if (transaccionEditando) {
+          body.fuenteIngreso = { id: parseInt(fuenteId, 10) };
+        } else {
+          body.fuenteIngresoId = parseInt(fuenteId, 10);
+        }
       }
     }
 
-    await fetch(`${API}/${endpoint}`, {
-      method: 'POST',
+    const url = transaccionEditando
+      ? `${API}/${endpoint}/${transaccionEditando.id}?usuarioId=${usuarioActual.id}`
+      : `${API}/${endpoint}`;
+    const method = transaccionEditando ? 'PUT' : 'POST';
+    const mensajeExito = transaccionEditando ? 'Transacción actualizada correctamente.' : 'Transacción guardada correctamente.';
+
+    const res = await fetch(url, {
+      method,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
 
+    if (!res.ok) {
+      const error = await res.text().catch(() => '');
+      mostrarMensaje(error || 'No se pudo guardar la transacción.');
+      return;
+    }
+
     cerrarModal();
+    mostrarMensaje(mensajeExito);
     cargar();
   }
 
   // ── Init ──────────────────────────────────────────────────────
-  cargar();
+  if (sesionActiva) {
+    cargar();
+  }
 </script>
 </body>
 </html>
