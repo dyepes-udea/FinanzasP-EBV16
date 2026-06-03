@@ -1,173 +1,105 @@
 # FinanzasP-EBV16 / Control de Finanzas Personales
 
-Aplicación web académica para gestionar finanzas personales. Permite registrar usuarios, iniciar sesión, administrar perfil, crear categorías y fuentes personalizadas, y gestionar ingresos y gastos asociados a cada usuario autenticado.
+Aplicación web académica para gestionar finanzas personales. Permite registrar usuarios, iniciar sesión, administrar perfil y gestionar ingresos, gastos, categorías y fuentes de ingreso por usuario autenticado.
 
-El backend está desarrollado con Spring Boot y el frontend es estático, construido con HTML, CSS y JavaScript vanilla, servido directamente desde Spring Boot.
+El backend está desarrollado con Spring Boot y el frontend está construido con HTML, CSS y JavaScript vanilla, servido directamente desde Spring Boot.
 
 ---
 
 ## Funcionalidades principales
 
-- Registro de usuario con correo y contraseña.
-- Inicio de sesión con correo y contraseña.
-- Persistencia visual de sesión en navegador mediante `localStorage`.
-- Cierre de sesión eliminando la clave `usuarioAutenticado`.
-- Visualización de perfil personal.
-- Edición del nombre del perfil.
-- Actualización de foto de perfil mediante URL.
-- Subida de foto de perfil desde archivo local.
-- Gestión de ingresos y gastos por usuario autenticado.
-- Cada usuario ve, crea, edita y elimina únicamente sus propias transacciones.
-- Creación, edición y eliminación de transacciones.
-- Filtro de transacciones por tipo: todas, ingresos o gastos.
-- Administración de categorías de gasto.
-- Categorías de gasto globales/predefinidas visibles para todos.
-- Categorías de gasto personalizadas visibles solo para el usuario que las creó.
-- Administración de fuentes de ingreso.
-- Fuentes de ingreso globales/predefinidas visibles para todos.
-- Fuentes de ingreso personalizadas visibles solo para el usuario que las creó.
-- Frontend servido por Spring Boot, sin necesidad de Node.js.
+* Registro e inicio de sesión con correo y contraseña.
+* Sesión visual mediante `localStorage`.
+* Cierre de sesión.
+* Perfil personal con edición de nombre.
+* Cambio de foto de perfil por URL o subida de archivo.
+* Creación, edición, eliminación y filtro de ingresos y gastos.
+* Cada usuario ve únicamente sus propias transacciones.
+* Categorías de gasto globales y categorías personalizadas por usuario.
+* Fuentes de ingreso globales y fuentes personalizadas por usuario.
+* Frontend estático servido desde Spring Boot, sin Node.js.
 
 ---
 
 ## Tecnologías utilizadas
 
-### Backend
-
-| Tecnología | Versión | Descripción |
-|---|---:|---|
-| Java | 17 | Lenguaje principal |
-| Spring Boot | 3.2.4 | Framework backend |
-| Spring Web | 3.2.4 | API REST |
-| Spring Data JPA | 3.2.4 | Persistencia con Hibernate |
-| Spring Validation | 3.2.4 | Validaciones |
-| H2 Database | Runtime | Base de datos en memoria |
-| Maven | 3.6+ | Gestión de dependencias y build |
-
-### Frontend
-
-| Tecnología | Descripción |
-|---|---|
-| HTML5 | Estructura de páginas |
-| CSS3 | Estilos |
-| JavaScript vanilla | Lógica del cliente |
-
-Ubicación del frontend:
-
-```text
-src/main/resources/static/
-```
-
-Archivos principales:
-
-- `index.html`: panel principal de finanzas personales.
-- `login.html`: inicio de sesión.
-- `registro.html`: registro de usuario.
-- `perfil.html`: perfil personal.
-- `admin.html`: administración de categorías de gasto.
-- `admin-fuentes.html`: administración de fuentes de ingreso.
-- `js/admin.js`: lógica de categorías.
-- `js/admin-fuentes.js`: lógica de fuentes de ingreso.
+| Capa          | Tecnologías                                                         |
+| ------------- | ------------------------------------------------------------------- |
+| Backend       | Java 17, Spring Boot 3.2.4, Spring Web, Spring Data JPA, Validation |
+| Base de datos | H2 en memoria                                                       |
+| Frontend      | HTML5, CSS3, JavaScript vanilla                                     |
+| Build         | Maven                                                               |
 
 ---
 
 ## Requisitos
 
-- Java 17 o superior.
-- Maven 3.6 o superior.
-- Navegador web moderno.
-
-No requiere Node.js, porque el frontend estático se sirve directamente desde Spring Boot.
+* Java 17 o superior.
+* Maven 3.6 o superior.
+* Navegador web moderno.
 
 ---
 
-## Estructura del proyecto
+## Estructura general
 
 ```text
-src/
-`-- main/
-    |-- java/com/finanzas/
-    |   |-- config/
-    |   |   |-- DataInitializer.java
-    |   |   `-- StaticUploadsConfig.java
-    |   |-- controller/
-    |   |   |-- AuthController.java
-    |   |   |-- UsuarioController.java
-    |   |   |-- GastoController.java
-    |   |   |-- IngresoController.java
-    |   |   |-- CategoriaController.java
-    |   |   `-- FuenteIngresoController.java
-    |   |-- dto/
-    |   |-- entity/
-    |   |-- repository/
-    |   `-- ControlFinanzasApplication.java
-    `-- resources/
-        |-- application.properties
-        `-- static/
-            |-- index.html
-            |-- login.html
-            |-- registro.html
-            |-- perfil.html
-            |-- admin.html
-            |-- admin-fuentes.html
-            |-- css/
-            |-- js/
-            `-- uploads/perfiles/
+src/main/java/com/finanzas/
+├── config/
+├── controller/
+├── dto/
+├── entity/
+├── repository/
+└── ControlFinanzasApplication.java
+
+src/main/resources/
+├── application.properties
+└── static/
+    ├── index.html
+    ├── login.html
+    ├── registro.html
+    ├── perfil.html
+    ├── admin.html
+    ├── admin-fuentes.html
+    ├── css/
+    ├── js/
+    └── uploads/perfiles/
 ```
 
 ---
 
 ## Ejecución local
 
-### 1. Clonar repositorio
+Clonar el repositorio:
 
 ```bash
 git clone https://github.com/dyepes-udea/FinanzasP-EBV16.git
 cd FinanzasP-EBV16
 ```
 
-### 2. Ejecutar aplicación
+Ejecutar la aplicación:
 
 ```bash
 mvn spring-boot:run
 ```
 
-### 3. Empaquetar aplicación
-
-```bash
-mvn clean package
-```
-
-### 4. Ejecutar el JAR generado
-
-```bash
-java -jar target/*.jar
-```
-
----
-
-## Acceso local
-
-Aplicación:
+Acceder en el navegador:
 
 ```text
 http://localhost:8080
 ```
 
-Pantallas principales:
+También se puede generar y ejecutar el `.jar`:
 
-- `http://localhost:8080/login.html`
-- `http://localhost:8080/registro.html`
-- `http://localhost:8080/index.html`
-- `http://localhost:8080/perfil.html`
-- `http://localhost:8080/admin.html`
-- `http://localhost:8080/admin-fuentes.html`
+```bash
+mvn clean package
+java -jar target/*.jar
+```
 
 ---
 
 ## Base de datos H2
 
-El proyecto usa H2 en memoria para alcance académico. Los datos se pierden al reiniciar la aplicación.
+El proyecto usa H2 en memoria, por lo tanto los datos se pierden al reiniciar la aplicación.
 
 Consola H2:
 
@@ -175,39 +107,26 @@ Consola H2:
 http://localhost:8080/h2-console
 ```
 
-Configuración real:
+Configuración:
 
-| Campo | Valor |
-|---|---|
+| Campo    | Valor                    |
+| -------- | ------------------------ |
 | JDBC URL | `jdbc:h2:mem:finanzasdb` |
-| User | `sa` |
-| Password | vacío |
-
-La propiedad `spring.jpa.hibernate.ddl-auto=create-drop` crea las tablas al iniciar y las elimina al cerrar la aplicación.
+| User     | `sa`                     |
+| Password | vacío                    |
 
 ---
 
 ## API REST principal
 
-> Nota: el sistema usa un alcance académico simple. No implementa Spring Security ni JWT. La relación con el usuario autenticado se controla enviando `usuarioId` desde el frontend.
-
 ### Autenticación
 
-| Método | Endpoint | Descripción |
-|---|---|---|
-| POST | `/api/auth/registro` | Registra un usuario con correo y contraseña |
-| POST | `/api/auth/login` | Valida credenciales y devuelve datos mínimos del usuario |
+| Método | Endpoint             | Descripción       |
+| ------ | -------------------- | ----------------- |
+| POST   | `/api/auth/registro` | Registrar usuario |
+| POST   | `/api/auth/login`    | Iniciar sesión    |
 
-Ejemplo de registro:
-
-```json
-{
-  "correo": "usuario@ejemplo.com",
-  "contrasena": "1234"
-}
-```
-
-Ejemplo de login:
+Ejemplo:
 
 ```json
 {
@@ -216,48 +135,15 @@ Ejemplo de login:
 }
 ```
 
-Respuesta exitosa de login:
-
-```json
-{
-  "id": 1,
-  "correo": "usuario@ejemplo.com",
-  "nombre": "",
-  "fotoUrl": ""
-}
-```
+---
 
 ### Usuario y perfil
 
-| Método | Endpoint | Descripción |
-|---|---|---|
-| PATCH | `/api/usuarios/{id}/nombre` | Actualiza el nombre del usuario |
-| PATCH | `/api/usuarios/{id}/foto` | Actualiza la foto mediante una URL |
-| POST | `/api/usuarios/{id}/foto-upload` | Sube una imagen usando `multipart/form-data` |
-
-Ejemplo para actualizar nombre:
-
-```json
-{
-  "nombre": "Juan Pérez"
-}
-```
-
-Ejemplo para actualizar foto por URL:
-
-```json
-{
-  "fotoUrl": "https://ejemplo.com/foto.jpg"
-}
-```
-
-Para subir foto desde archivo:
-
-- Método: `POST`
-- Endpoint: `/api/usuarios/{id}/foto-upload`
-- Tipo: `multipart/form-data`
-- Campo de archivo: `foto`
-- Tipos permitidos: `image/jpeg`, `image/png`, `image/webp`, `image/gif`
+| Método | Endpoint                         | Descripción              |
+| ------ | -------------------------------- | ------------------------ |
+| PATCH  | `/api/usuarios/{id}/nombre`      | Editar nombre            |
+| PATCH  | `/api/usuarios/{id}/foto`        | Actualizar foto por URL  |
+| POST   | `/api/usuarios/{id}/foto-upload` | Subir foto desde archivo |
 
 Las imágenes subidas se guardan localmente en:
 
@@ -265,23 +151,18 @@ Las imágenes subidas se guardan localmente en:
 src/main/resources/static/uploads/perfiles
 ```
 
-La URL guardada en el usuario queda con formato:
-
-```text
-/uploads/perfiles/nombre-del-archivo.jpg
-```
+---
 
 ### Gastos
 
-| Método | Endpoint | Parámetros | Descripción |
-|---|---|---|---|
-| GET | `/api/gastos` | `usuarioId` obligatorio, `categoriaId` opcional | Lista gastos del usuario |
-| GET | `/api/gastos/{id}` | `usuarioId` obligatorio | Obtiene un gasto solo si pertenece al usuario |
-| POST | `/api/gastos` | Body JSON | Crea un gasto asociado al usuario |
-| PUT | `/api/gastos/{id}` | `usuarioId` obligatorio | Edita un gasto solo si pertenece al usuario |
-| DELETE | `/api/gastos/{id}` | `usuarioId` obligatorio | Elimina un gasto solo si pertenece al usuario |
+| Método | Endpoint                          | Descripción               |
+| ------ | --------------------------------- | ------------------------- |
+| GET    | `/api/gastos?usuarioId={id}`      | Listar gastos del usuario |
+| POST   | `/api/gastos`                     | Crear gasto               |
+| PUT    | `/api/gastos/{id}?usuarioId={id}` | Editar gasto propio       |
+| DELETE | `/api/gastos/{id}?usuarioId={id}` | Eliminar gasto propio     |
 
-Ejemplo para crear gasto:
+Ejemplo:
 
 ```json
 {
@@ -293,36 +174,18 @@ Ejemplo para crear gasto:
 }
 ```
 
-Ejemplo para editar gasto:
-
-```json
-{
-  "descripcion": "Mercado actualizado",
-  "monto": 90000,
-  "fecha": "2026-05-06",
-  "categoria": {
-    "id": 1
-  }
-}
-```
-
-Ruta de edición:
-
-```text
-PUT /api/gastos/{id}?usuarioId=1
-```
+---
 
 ### Ingresos
 
-| Método | Endpoint | Parámetros | Descripción |
-|---|---|---|---|
-| GET | `/api/ingresos` | `usuarioId` obligatorio, `categoriaId` opcional | Lista ingresos del usuario |
-| GET | `/api/ingresos/{id}` | `usuarioId` obligatorio | Obtiene un ingreso solo si pertenece al usuario |
-| POST | `/api/ingresos` | Body JSON | Crea un ingreso asociado al usuario |
-| PUT | `/api/ingresos/{id}` | `usuarioId` obligatorio | Edita un ingreso solo si pertenece al usuario |
-| DELETE | `/api/ingresos/{id}` | `usuarioId` obligatorio | Elimina un ingreso solo si pertenece al usuario |
+| Método | Endpoint                            | Descripción                 |
+| ------ | ----------------------------------- | --------------------------- |
+| GET    | `/api/ingresos?usuarioId={id}`      | Listar ingresos del usuario |
+| POST   | `/api/ingresos`                     | Crear ingreso               |
+| PUT    | `/api/ingresos/{id}?usuarioId={id}` | Editar ingreso propio       |
+| DELETE | `/api/ingresos/{id}?usuarioId={id}` | Eliminar ingreso propio     |
 
-Ejemplo para crear ingreso:
+Ejemplo:
 
 ```json
 {
@@ -334,110 +197,39 @@ Ejemplo para crear ingreso:
 }
 ```
 
-Ejemplo para editar ingreso:
+---
 
-```json
-{
-  "descripcion": "Trabajo freelance actualizado",
-  "monto": 600000,
-  "fecha": "2026-05-06",
-  "fuenteIngreso": {
-    "id": 2
-  }
-}
-```
+### Categorías y fuentes
 
-Ruta de edición:
+Las categorías y fuentes predefinidas son globales y visibles para todos. Las creadas por un usuario solo son visibles para ese usuario.
 
-```text
-PUT /api/ingresos/{id}?usuarioId=1
-```
+| Recurso             | Endpoint base          |
+| ------------------- | ---------------------- |
+| Categorías de gasto | `/api/categorias`      |
+| Fuentes de ingreso  | `/api/fuentes-ingreso` |
 
-### Categorías de gasto
-
-Las categorías predefinidas tienen `usuario == null` y son visibles para todos. Las categorías personalizadas tienen usuario asociado y solo son visibles para su propietario.
-
-| Método | Endpoint | Parámetros | Descripción |
-|---|---|---|---|
-| GET | `/api/categorias` | `usuarioId` opcional | Lista categorías globales y, si se envía `usuarioId`, también las propias |
-| GET | `/api/categorias/tipo/{tipo}` | `usuarioId` opcional | Lista por tipo, principalmente `GASTO` |
-| GET | `/api/categorias/{id}` | `usuarioId` opcional | Obtiene una categoría si es visible para el usuario |
-| POST | `/api/categorias` | Body JSON con `usuarioId` | Crea categoría personalizada |
-| PUT | `/api/categorias/{id}` | `usuarioId` obligatorio | Actualiza categoría personalizada propia |
-| PATCH | `/api/categorias/{id}` | `usuarioId` obligatorio | Actualiza parcialmente categoría propia |
-| PATCH | `/api/categorias/{id}/nombre` | `usuarioId` obligatorio | Actualiza nombre de categoría propia |
-| PATCH | `/api/categorias/{id}/descripcion` | `usuarioId` obligatorio | Actualiza descripción de categoría propia |
-| GET | `/api/categorias/{id}/referencias` | `usuarioId` obligatorio | Consulta referencias antes de eliminar |
-| POST | `/api/categorias/{id}/eliminar` | `usuarioId` obligatorio | Elimina con opciones si hay referencias |
-| DELETE | `/api/categorias/{id}` | `usuarioId` obligatorio | Elimina categoría propia sin referencias |
-
-Ejemplo para crear categoría personalizada:
-
-```json
-{
-  "nombre": "Mascotas",
-  "descripcion": "Gastos de mascotas",
-  "tipo": "GASTO",
-  "usuarioId": 1
-}
-```
-
-Las categorías globales/predefinidas no pueden ser editadas ni eliminadas por usuarios comunes.
-
-### Fuentes de ingreso
-
-Las fuentes predefinidas tienen `usuario == null` y son visibles para todos. Las fuentes personalizadas tienen usuario asociado y solo son visibles para su propietario.
-
-| Método | Endpoint | Parámetros | Descripción |
-|---|---|---|---|
-| GET | `/api/fuentes-ingreso` | `usuarioId` opcional | Lista fuentes globales y, si se envía `usuarioId`, también las propias |
-| GET | `/api/fuentes-ingreso/{id}` | `usuarioId` opcional | Obtiene una fuente si es visible para el usuario |
-| POST | `/api/fuentes-ingreso` | Body JSON con `usuarioId` | Crea fuente personalizada |
-| PUT | `/api/fuentes-ingreso/{id}` | `usuarioId` obligatorio | Actualiza fuente personalizada propia |
-| PATCH | `/api/fuentes-ingreso/{id}` | `usuarioId` obligatorio | Actualiza parcialmente fuente propia |
-| PATCH | `/api/fuentes-ingreso/{id}/nombre` | `usuarioId` obligatorio | Actualiza nombre de fuente propia |
-| PATCH | `/api/fuentes-ingreso/{id}/descripcion` | `usuarioId` obligatorio | Actualiza descripción de fuente propia |
-| GET | `/api/fuentes-ingreso/{id}/referencias` | `usuarioId` obligatorio | Consulta referencias antes de eliminar |
-| POST | `/api/fuentes-ingreso/{id}/eliminar` | `usuarioId` obligatorio | Elimina con opciones si hay referencias |
-| DELETE | `/api/fuentes-ingreso/{id}` | `usuarioId` obligatorio | Elimina fuente propia sin referencias |
-
-Ejemplo para crear fuente personalizada:
-
-```json
-{
-  "nombre": "Freelance",
-  "descripcion": "Ingresos por trabajos independientes",
-  "usuarioId": 1
-}
-```
-
-Las fuentes globales/predefinidas no pueden ser editadas ni eliminadas por usuarios comunes.
+En las operaciones de usuario se usa `usuarioId` para listar, crear, editar o eliminar elementos propios.
 
 ---
 
 ## Despliegue en Render
 
-### 1. Subir el proyecto a GitHub
+Antes de desplegar, en `src/main/resources/application.properties` el puerto debe quedar así:
 
-Confirmar que los cambios estén guardados y subir el proyecto actualizado al repositorio:
-
-```bash
-git add .
-git commit -m "Actualiza proyecto de finanzas personales"
-git push origin main
+```properties
+server.port=${PORT:8080}
 ```
 
-Usar `main`, `develop` u otra rama según la rama real del despliegue.
+Esto permite que localmente use `8080`, pero en Render use el puerto asignado por la plataforma.
 
-### 2. Crear servicio en Render
+Pasos para desplegar:
 
-1. Entrar a [Render](https://render.com/).
-2. Crear un nuevo **Web Service**.
-3. Conectar el repositorio de GitHub.
-4. Seleccionar la rama a desplegar, por ejemplo `main` o `develop`.
-5. Configurar el runtime como Java o Native Runtime compatible.
-
-### 3. Configurar comandos
+1. Subir el proyecto actualizado a GitHub.
+2. Entrar a Render.
+3. Crear un nuevo Web Service.
+4. Conectar el repositorio de GitHub.
+5. Seleccionar la rama que se va a desplegar, por ejemplo `main` o `develop`.
+6. Configurar los comandos:
 
 Build Command:
 
@@ -451,46 +243,23 @@ Start Command:
 java -jar target/*.jar
 ```
 
-### 4. Configurar puerto
+7. Guardar y desplegar.
 
-Render asigna el puerto mediante la variable de entorno `PORT`. Para que el proyecto sea compatible con Render, `application.properties` debe usar:
-
-```properties
-server.port=${PORT:8080}
-```
-
-Actualmente el proyecto tiene:
-
-```properties
-server.port=8080
-```
-
-Por lo tanto, antes de desplegar en Render se debe ajustar esa propiedad para respetar el puerto asignado por la plataforma.
-
-### 5. Acceso público
-
-Después del despliegue, Render genera una URL pública del servicio. Desde esa URL se puede acceder al frontend servido por Spring Boot.
-
-### 6. Consideraciones en Render
-
-- No requiere Node.js.
-- El frontend se sirve desde `src/main/resources/static`.
-- La base de datos H2 es en memoria.
-- Los usuarios, transacciones, categorías personalizadas, fuentes personalizadas y referencias de foto pueden perderse al reiniciar o redeplegar el servicio.
-- Las imágenes subidas se guardan localmente en el proyecto durante la ejecución, pero la referencia queda en H2; al reiniciar, esa relación puede perderse.
+Render generará una URL pública para acceder a la aplicación.
 
 ---
 
 ## Notas importantes
 
-- Proyecto académico con alcance simple.
-- No implementa Spring Security, JWT ni roles.
-- Las contraseñas se almacenan en texto plano por alcance académico; no se recomienda para producción.
-- La sesión visual se maneja en frontend con `localStorage`.
-- La separación de datos por usuario se realiza enviando `usuarioId` a los endpoints correspondientes.
-- H2 se usa en memoria; no hay persistencia real entre reinicios.
-- Las categorías y fuentes globales son creadas por inicialización del sistema y se comparten entre usuarios.
-- Las categorías y fuentes personalizadas pertenecen al usuario que las creó.
+* No requiere Node.js.
+* El frontend se sirve desde Spring Boot.
+* La base de datos H2 es en memoria.
+* Los datos se pierden al reiniciar o redeplegar la aplicación.
+* Las imágenes subidas se guardan localmente durante la ejecución.
+* No implementa Spring Security, JWT ni roles.
+* La sesión se maneja en frontend con `localStorage`.
+* Las contraseñas se almacenan en texto plano por alcance académico.
+* Proyecto académico, no recomendado para producción sin ajustes de seguridad y persistencia.
 
 ---
 

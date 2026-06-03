@@ -126,6 +126,11 @@ public class CategoriaController {
     public ResponseEntity<?> actualizar(@PathVariable Long id,
                                         @RequestParam(required = false) Long usuarioId,
                                         @Valid @RequestBody ActualizarCategoriaDTO categoriaActualizada) {
+        if (categoriaActualizada == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Categoria invalida", "Debe enviar los datos de la categoria"));
+        }
+
         Optional<Categoria> categoriaExistente = categoriaRepository.findById(id);
         if (categoriaExistente.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -138,7 +143,8 @@ public class CategoriaController {
         if (permiso != null) return permiso;
 
         String nombre = categoriaActualizada.getNombre() != null ? categoriaActualizada.getNombre().trim() : "";
-        ResponseEntity<?> validacion = validarDatosCategoria(nombre, categoriaActualizada.getTipo());
+        TipoCategoria tipo = categoriaActualizada.getTipo() != null ? categoriaActualizada.getTipo() : TipoCategoria.GASTO;
+        ResponseEntity<?> validacion = validarDatosCategoria(nombre, tipo);
         if (validacion != null) return validacion;
 
         if (existeNombreVisible(nombre, TipoCategoria.GASTO, usuarioId, id)) {
@@ -157,6 +163,11 @@ public class CategoriaController {
     public ResponseEntity<?> actualizarParcial(@PathVariable Long id,
                                                @RequestParam(required = false) Long usuarioId,
                                                @RequestBody ActualizarCategoriaDTO actualizacion) {
+        if (actualizacion == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Categoria invalida", "Debe enviar los datos de la categoria"));
+        }
+
         Optional<Categoria> categoriaExistente = categoriaRepository.findById(id);
         if (categoriaExistente.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -220,8 +231,8 @@ public class CategoriaController {
         if (permiso != null) return permiso;
 
         Categoria categoria = categoriaExistente.get();
-        long gastosVinculados = gastoRepository.countByCategoria_Id(id);
-        long ingresosVinculados = ingresoRepository.countByCategoria_Id(id);
+        long gastosVinculados = gastoRepository.findByUsuario_IdAndCategoria_IdOrderByFechaDesc(usuarioId, id).size();
+        long ingresosVinculados = ingresoRepository.findByUsuario_IdAndCategoria_IdOrderByFechaDesc(usuarioId, id).size();
         return ResponseEntity.ok(new InfoEliminacionDTO(id, categoria.getNombre(), gastosVinculados, ingresosVinculados));
     }
 
@@ -239,8 +250,8 @@ public class CategoriaController {
         ResponseEntity<?> permiso = validarGestionCategoria(categoria, usuarioId, "eliminar");
         if (permiso != null) return permiso;
 
-        long gastosVinculados = gastoRepository.countByCategoria_Id(id);
-        long ingresosVinculados = ingresoRepository.countByCategoria_Id(id);
+        long gastosVinculados = gastoRepository.findByUsuario_IdAndCategoria_IdOrderByFechaDesc(usuarioId, id).size();
+        long ingresosVinculados = ingresoRepository.findByUsuario_IdAndCategoria_IdOrderByFechaDesc(usuarioId, id).size();
 
         if (gastosVinculados == 0 && ingresosVinculados == 0) {
             categoriaRepository.deleteById(id);
@@ -269,11 +280,11 @@ public class CategoriaController {
             }
 
             Categoria target = targetOpt.get();
-            List<Gasto> gastosList = gastoRepository.findByCategoria_IdOrderByFechaDesc(id);
+            List<Gasto> gastosList = gastoRepository.findByUsuario_IdAndCategoria_IdOrderByFechaDesc(usuarioId, id);
             gastosList.forEach(g -> g.setCategoria(target));
             gastoRepository.saveAll(gastosList);
 
-            List<Ingreso> ingresosList = ingresoRepository.findByCategoria_IdOrderByFechaDesc(id);
+            List<Ingreso> ingresosList = ingresoRepository.findByUsuario_IdAndCategoria_IdOrderByFechaDesc(usuarioId, id);
             ingresosList.forEach(i -> i.setCategoria(target));
             ingresoRepository.saveAll(ingresosList);
 
@@ -282,8 +293,8 @@ public class CategoriaController {
         }
 
         if (dto.isEliminarTransacciones()) {
-            gastoRepository.deleteAll(gastoRepository.findByCategoria_IdOrderByFechaDesc(id));
-            ingresoRepository.deleteAll(ingresoRepository.findByCategoria_IdOrderByFechaDesc(id));
+            gastoRepository.deleteAll(gastoRepository.findByUsuario_IdAndCategoria_IdOrderByFechaDesc(usuarioId, id));
+            ingresoRepository.deleteAll(ingresoRepository.findByUsuario_IdAndCategoria_IdOrderByFechaDesc(usuarioId, id));
             categoriaRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         }
@@ -304,8 +315,8 @@ public class CategoriaController {
         ResponseEntity<?> permiso = validarGestionCategoria(categoria, usuarioId, "eliminar");
         if (permiso != null) return permiso;
 
-        long gastosVinculados = gastoRepository.countByCategoria_Id(id);
-        long ingresosVinculados = ingresoRepository.countByCategoria_Id(id);
+        long gastosVinculados = gastoRepository.findByUsuario_IdAndCategoria_IdOrderByFechaDesc(usuarioId, id).size();
+        long ingresosVinculados = ingresoRepository.findByUsuario_IdAndCategoria_IdOrderByFechaDesc(usuarioId, id).size();
         if (gastosVinculados > 0 || ingresosVinculados > 0) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ErrorResponseDTO(409, "Categoria en uso",
