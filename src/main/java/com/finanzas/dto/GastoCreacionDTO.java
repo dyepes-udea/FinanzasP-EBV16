@@ -12,6 +12,9 @@ public class GastoCreacionDTO {
     
     @NotNull(message = "El ID de categoría es obligatorio")
     private Long categoriaId;
+
+    @NotNull(message = "El ID de usuario es obligatorio")
+    private Long usuarioId;
     
     @NotNull(message = "El monto es obligatorio")
     @Positive(message = "El monto debe ser positivo")
@@ -34,6 +37,9 @@ public class GastoCreacionDTO {
 
     public Long getCategoriaId() { return categoriaId; }
     public void setCategoriaId(Long categoriaId) { this.categoriaId = categoriaId; }
+
+    public Long getUsuarioId() { return usuarioId; }
+    public void setUsuarioId(Long usuarioId) { this.usuarioId = usuarioId; }
 
     public Double getMonto() { return monto; }
     public void setMonto(Double monto) { this.monto = monto; }

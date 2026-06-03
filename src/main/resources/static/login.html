@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Inicio de sesion</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f8fbff 0%, #eef6f1 48%, #fff7ed 100%);
+      color: #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .login {
+      width: 100%;
+      max-width: 430px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 18px 40px rgba(31, 41, 55, 0.12);
+      padding: 2rem;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 1.45rem;
+      padding-bottom: 1.2rem;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    .brand-mark {
+      width: 3rem;
+      height: 3rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      background: #2a9d8f;
+      color: #fff;
+      font-size: 1.35rem;
+      font-weight: 850;
+      margin-bottom: 0.7rem;
+      box-shadow: 0 10px 22px rgba(42, 157, 143, 0.22);
+    }
+
+    .brand-title {
+      font-size: 1.55rem;
+      font-weight: 850;
+      line-height: 1.15;
+      color: #111827;
+      margin-bottom: 0.35rem;
+    }
+
+    .brand-copy {
+      color: #64748b;
+      font-size: 0.95rem;
+      line-height: 1.35;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .login-heading {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .subtitulo {
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem 0.85rem;
+      border: 1px solid #dbe4ee;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #2a9d8f;
+      box-shadow: 0 0 0 4px rgba(42, 157, 143, 0.12);
+    }
+
+    input.campo-error {
+      border-color: #dc2626;
+      background: #fff7f7;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.82rem;
+      border: none;
+      border-radius: 9px;
+      background: #1a1a2e;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 750;
+      cursor: pointer;
+      margin-top: 0.35rem;
+    }
+
+    button:hover {
+      background: #2d2d50;
+    }
+
+    .links {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .links a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 650;
+    }
+
+    .mensaje {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.9rem;
+      border-radius: 8px;
+      line-height: 1.35;
+      font-weight: 650;
+    }
+
+    .mensaje.error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+  </style>
+</head>
+<body>
+  <main class="login">
+    <section class="brand">
+      <div class="brand-mark">$</div>
+      <div class="brand-title">Control de Finanzas Personales</div>
+      <p class="brand-copy">Gestiona tus ingresos y gastos de forma sencilla</p>
+    </section>
+
+    <section class="login-heading">
+      <h1>Ingresar</h1>
+      <p class="subtitulo">Accede al panel principal de finanzas personales con tu correo y contrasena.</p>
+    </section>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="correo">Correo electronico</label>
+        <input id="correo" name="correo" type="text" placeholder="correo@ejemplo.com">
+      </div>
+
+      <div class="form-group">
+        <label for="contrasena">Contrasena</label>
+        <input id="contrasena" name="contrasena" type="password" placeholder="Ingresa tu contrasena">
+      </div>
+
+      <button type="submit">Ingresar</button>
+    </form>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <div class="links">
+      <a href="registro.html">Crear cuenta</a>
+      <a href="index.html">Volver al inicio</a>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const correoInput = document.getElementById('correo');
+    const contrasenaInput = document.getElementById('contrasena');
+    const mensaje = document.getElementById('mensaje');
+
+    function mostrarError(texto) {
+      mensaje.textContent = texto;
+      mensaje.className = 'mensaje error';
+    }
+
+    function limpiarErrores() {
+      mensaje.className = 'mensaje';
+      mensaje.textContent = '';
+      correoInput.classList.remove('campo-error');
+      contrasenaInput.classList.remove('campo-error');
+    }
+
+    async function obtenerMensajeError(res) {
+      const text = await res.text().catch(() => '');
+      if (!text) return 'Usuario o contraseña incorrectos';
+
+      try {
+        const error = JSON.parse(text);
+        return error.detalles || error.mensaje || 'Usuario o contraseña incorrectos';
+      } catch (e) {
+        return text;
+      }
+    }
+
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      limpiarErrores();
+
+      const correo = correoInput.value.trim();
+      const contrasena = contrasenaInput.value;
+      const faltantes = [];
+
+      if (!correo) {
+        correoInput.classList.add('campo-error');
+        faltantes.push('correo');
+      }
+
+      if (!contrasena.trim()) {
+        contrasenaInput.classList.add('campo-error');
+        faltantes.push('contrasena');
+      }
+
+      if (faltantes.length > 0) {
+        mostrarError('Completa el correo y la contrasena para ingresar');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ correo, contrasena })
+        });
+
+        if (res.ok) {
+          const usuario = await res.json();
+          localStorage.setItem('usuarioAutenticado', JSON.stringify({
+            id: usuario.id,
+            correo: usuario.correo,
+            nombre: usuario.nombre || '',
+            fotoUrl: usuario.fotoUrl || ''
+          }));
+          window.location.href = 'index.html';
+          return;
+        }
+
+        mostrarError(await obtenerMensajeError(res));
+      } catch (err) {
+        mostrarError('No se pudo conectar con el servidor');
+      }
+    });
+  </script>
+</body>
+</html>

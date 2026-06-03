@@ -1,5 +1,6 @@
 package com.finanzas.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
@@ -12,13 +13,21 @@ public class FuenteIngreso {
     private Long id;
 
     @NotBlank(message = "El nombre de la fuente es obligatorio")
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String nombre;
 
     private String descripcion;
 
     @Column(nullable = false)
     private String tipo = "INGRESO";
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "usuario_id")
+    @JsonIgnore
+    private Usuario usuario;
+
+    @Transient
+    private Long usuarioId;
 
     public FuenteIngreso() {}
 
@@ -44,4 +53,12 @@ public class FuenteIngreso {
 
     public String getTipo() { return tipo; }
     public void setTipo(String tipo) { this.tipo = tipo; }
+
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+
+    public Long getUsuarioId() { return usuarioId; }
+    public void setUsuarioId(Long usuarioId) { this.usuarioId = usuarioId; }
+
+    public boolean isGlobal() { return usuario == null; }
 }

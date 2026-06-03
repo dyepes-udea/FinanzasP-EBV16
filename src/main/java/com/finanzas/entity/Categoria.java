@@ -1,5 +1,6 @@
 package com.finanzas.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
@@ -12,7 +13,7 @@ public class Categoria {
     private Long id;
 
     @NotBlank(message = "El nombre de la categoría es obligatorio")
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String nombre;
 
     private String descripcion;
@@ -20,6 +21,14 @@ public class Categoria {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoCategoria tipo;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "usuario_id")
+    @JsonIgnore
+    private Usuario usuario;
+
+    @Transient
+    private Long usuarioId;
 
     public Categoria() {}
 
@@ -45,4 +54,12 @@ public class Categoria {
 
     public TipoCategoria getTipo() { return tipo; }
     public void setTipo(TipoCategoria tipo) { this.tipo = tipo; }
+
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+
+    public Long getUsuarioId() { return usuarioId; }
+    public void setUsuarioId(Long usuarioId) { this.usuarioId = usuarioId; }
+
+    public boolean isGlobal() { return usuario == null; }
 }

@@ -1,4 +1,28 @@
 const API = '/api';
+let usuarioActual = null;
+
+function cargarUsuarioActual() {
+  const raw = localStorage.getItem('usuarioAutenticado');
+  if (!raw) {
+    window.location.href = 'login.html';
+    return false;
+  }
+
+  try {
+    const usuario = JSON.parse(raw);
+    if (!usuario || !usuario.id) {
+      localStorage.removeItem('usuarioAutenticado');
+      window.location.href = 'login.html';
+      return false;
+    }
+    usuarioActual = usuario;
+    return true;
+  } catch (err) {
+    localStorage.removeItem('usuarioAutenticado');
+    window.location.href = 'login.html';
+    return false;
+  }
+}
 
 function showMessage(msg, isError) {
   const el = document.getElementById('message');
@@ -205,7 +229,7 @@ function showDeleteOptionsModal({ title, message, options, cancelText = 'Cancela
 
 async function fetchFuentes() {
   try {
-    const res = await fetch(`${API}/fuentes-ingreso`);
+    const res = await fetch(`${API}/fuentes-ingreso?usuarioId=${usuarioActual.id}`);
     if (!res.ok) throw new Error('No se pudo obtener fuentes de ingreso');
     const data = await res.json();
     renderFuentes(data);
@@ -228,8 +252,8 @@ function renderFuentes(items) {
       <td>${escapeHtml(fuente.nombre || '')}</td>
       <td>${escapeHtml(fuente.descripcion || '')}</td>
       <td class="actions">
-        <button class="btn small" data-id="${fuente.id}" data-action="edit">Editar</button>
-        <button class="btn small danger" data-id="${fuente.id}" data-action="delete">Eliminar</button>
+        <button class="btn small" data-id="${fuente.id}" data-action="edit" ${fuente.global ? 'disabled title="Fuente predefinida"' : ''}>Editar</button>
+        <button class="btn small danger" data-id="${fuente.id}" data-action="delete" ${fuente.global ? 'disabled title="Fuente predefinida"' : ''}>Eliminar</button>
       </td>
     `;
     body.appendChild(tr);
@@ -242,7 +266,7 @@ function renderFuentes(items) {
       const row = btn.closest('tr');
       const nombre = row.children[1].textContent;
       const descripcion = row.children[2].textContent;
-      const fuente = { id: parseInt(id,10), nombre, descripcion };
+      const fuente = items.find(item => item.id === parseInt(id, 10)) || { id: parseInt(id,10), nombre, descripcion };
       if (action === 'edit') return editFuente(fuente);
       if (action === 'delete') return deleteFuente(fuente);
     });
@@ -250,6 +274,11 @@ function renderFuentes(items) {
 }
 
 async function editFuente(fuente) {
+  if (fuente.global) {
+    showMessage('Las fuentes predefinidas no se pueden modificar', true);
+    return;
+  }
+
   try {
     const values = await showFormModal({
       title: 'Editar fuente de ingreso',
@@ -269,7 +298,7 @@ async function editFuente(fuente) {
       return;
     }
 
-    const res = await fetch(`${API}/fuentes-ingreso/${fuente.id}`, {
+    const res = await fetch(`${API}/fuentes-ingreso/${fuente.id}?usuarioId=${usuarioActual.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -288,8 +317,13 @@ async function editFuente(fuente) {
 }
 
 async function deleteFuente(fuente) {
+  if (fuente.global) {
+    showMessage('Las fuentes predefinidas no se pueden eliminar', true);
+    return;
+  }
+
   try {
-    const refRes = await fetch(`${API}/fuentes-ingreso/${fuente.id}/referencias`);
+    const refRes = await fetch(`${API}/fuentes-ingreso/${fuente.id}/referencias?usuarioId=${usuarioActual.id}`);
     if (!refRes.ok) throw new Error('No se pudo obtener información de referencias');
     const info = await refRes.json();
 
@@ -301,7 +335,7 @@ async function deleteFuente(fuente) {
         confirmText: 'Eliminar'
       });
       if (!confirmado) return;
-      const res = await fetch(`${API}/fuentes-ingreso/${fuente.id}`, { method: 'DELETE' });
+      const res = await fetch(`${API}/fuentes-ingreso/${fuente.id}?usuarioId=${usuarioActual.id}`, { method: 'DELETE' });
       if (res.status === 204) { showMessage('Fuente de ingreso eliminada'); fetchFuentes(); }
       else { showMessage('Error eliminando fuente', true); }
       return;
@@ -324,7 +358,7 @@ async function deleteFuente(fuente) {
         confirmText: 'Eliminar ingresos'
       });
       if (!confirmado) return;
-      const res = await fetch(`${API}/fuentes-ingreso/${fuente.id}/eliminar`, {
+      const res = await fetch(`${API}/fuentes-ingreso/${fuente.id}/eliminar?usuarioId=${usuarioActual.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ confirmar: true, eliminarTransacciones: true })
@@ -349,7 +383,7 @@ async function createFuente(event) {
     const res = await fetch(`${API}/fuentes-ingreso`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre, descripcion })
+      body: JSON.stringify({ nombre, descripcion, usuarioId: usuarioActual.id })
     });
 
     if (res.status === 201) {
@@ -366,6 +400,7 @@ async function createFuente(event) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (!cargarUsuarioActual()) return;
   document.getElementById('createForm').addEventListener('submit', createFuente);
   fetchFuentes();
 });

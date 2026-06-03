@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mi perfil</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f8fbff 0%, #eef6f1 48%, #fff7ed 100%);
+      color: #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .perfil {
+      width: 100%;
+      max-width: 480px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 18px 40px rgba(31, 41, 55, 0.12);
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitulo {
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+
+    .perfil-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #f8fbff;
+      margin-bottom: 1.2rem;
+    }
+
+    .avatar,
+    .foto {
+      width: 4.3rem;
+      height: 4.3rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .avatar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #2a9d8f;
+      color: #fff;
+      font-size: 1.7rem;
+      font-weight: 850;
+    }
+
+    .foto {
+      object-fit: cover;
+      border: 2px solid #dbe4ee;
+    }
+
+    .nombre {
+      font-size: 1.15rem;
+      font-weight: 850;
+      overflow-wrap: anywhere;
+    }
+
+    .correo {
+      color: #64748b;
+      margin-top: 0.2rem;
+      overflow-wrap: anywhere;
+    }
+
+    .dato {
+      padding: 0.9rem 0;
+      border-bottom: 1px solid #eef2f7;
+    }
+
+    .dato:last-of-type {
+      border-bottom: none;
+    }
+
+    .dato span {
+      display: block;
+      color: #64748b;
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .dato strong {
+      display: block;
+      margin-top: 0.25rem;
+      font-size: 1rem;
+      overflow-wrap: anywhere;
+    }
+
+    .editar-perfil {
+      margin-top: 1rem;
+      padding: 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .editar-perfil label {
+      display: block;
+      color: #64748b;
+      font-size: 0.82rem;
+      font-weight: 800;
+      margin-bottom: 0.45rem;
+      text-transform: uppercase;
+    }
+
+    .editar-perfil input {
+      width: 100%;
+      padding: 0.72rem 0.85rem;
+      border: 1px solid #dbe4ee;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .editar-perfil input:focus {
+      border-color: #2a9d8f;
+      box-shadow: 0 0 0 4px rgba(42, 157, 143, 0.12);
+    }
+
+    .editar-perfil button {
+      width: 100%;
+      padding: 0.76rem;
+      border: none;
+      border-radius: 9px;
+      background: #1a1a2e;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 800;
+      margin-top: 0.75rem;
+    }
+
+    .mensaje {
+      display: none;
+      margin-top: 1rem;
+      padding: 0.85rem;
+      border-radius: 8px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .mensaje.success {
+      display: block;
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .mensaje.error {
+      display: block;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .acciones {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 1.4rem;
+      flex-wrap: wrap;
+    }
+
+    .acciones a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9px;
+      padding: 0.72rem 0.95rem;
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .principal {
+      background: #1a1a2e;
+      color: #fff;
+    }
+
+    .secundario {
+      background: #e0f2fe;
+      color: #075985;
+    }
+  </style>
+</head>
+<body>
+  <main class="perfil">
+    <h1>Mi perfil</h1>
+    <p class="subtitulo">Datos basicos de la cuenta autenticada.</p>
+
+    <section class="perfil-header">
+      <div id="avatarContenedor"></div>
+      <div>
+        <div class="nombre" id="nombreResumen"></div>
+        <div class="correo" id="correoResumen"></div>
+      </div>
+    </section>
+
+    <div class="dato">
+      <span>Nombre</span>
+      <strong id="nombreDetalle"></strong>
+    </div>
+
+    <div class="dato">
+      <span>Correo</span>
+      <strong id="correoDetalle"></strong>
+    </div>
+
+    <form class="editar-perfil" id="nombreForm">
+      <label for="nombreInput">Editar nombre</label>
+      <input id="nombreInput" type="text" placeholder="Ingresa tu nombre">
+      <button type="submit">Guardar nombre</button>
+    </form>
+
+    <form class="editar-perfil" id="fotoForm">
+      <label for="fotoInput">URL de foto de perfil</label>
+      <input id="fotoInput" type="text" placeholder="https://ejemplo.com/foto.jpg">
+      <button type="submit">Guardar foto</button>
+    </form>
+
+    <form class="editar-perfil" id="fotoUploadForm">
+      <label for="fotoArchivo">Subir foto desde el computador</label>
+      <input id="fotoArchivo" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
+      <button type="submit">Subir foto</button>
+    </form>
+
+    <div id="mensaje" class="mensaje"></div>
+
+    <div class="acciones">
+      <a class="principal" href="index.html">Volver al panel</a>
+      <a class="secundario" href="login.html">Ir a login</a>
+    </div>
+  </main>
+
+  <script>
+    const raw = localStorage.getItem('usuarioAutenticado');
+    let usuarioActual = null;
+
+    if (!raw) {
+      window.location.href = 'login.html';
+    } else {
+      try {
+        const usuario = JSON.parse(raw);
+        if (!usuario || !usuario.correo) {
+          localStorage.removeItem('usuarioAutenticado');
+          window.location.href = 'login.html';
+        } else {
+          usuarioActual = usuario;
+          renderPerfil(usuario);
+        }
+      } catch (err) {
+        localStorage.removeItem('usuarioAutenticado');
+        window.location.href = 'login.html';
+      }
+    }
+
+    function renderPerfil(usuario) {
+      const nombre = (usuario.nombre || '').trim();
+      const correo = usuario.correo;
+      const fotoUrl = (usuario.fotoUrl || '').trim();
+      const nombreVisible = nombre || 'Nombre no registrado';
+      const inicial = (nombre || correo || '?').charAt(0).toUpperCase();
+      const avatarContenedor = document.getElementById('avatarContenedor');
+      avatarContenedor.innerHTML = '';
+
+      if (fotoUrl) {
+        const img = document.createElement('img');
+        img.className = 'foto';
+        img.src = fotoUrl;
+        img.alt = 'Foto de perfil';
+        img.onerror = () => {
+          avatarContenedor.innerHTML = '';
+          const avatar = document.createElement('div');
+          avatar.className = 'avatar';
+          avatar.textContent = inicial;
+          avatarContenedor.appendChild(avatar);
+        };
+        avatarContenedor.appendChild(img);
+      } else {
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.textContent = inicial;
+        avatarContenedor.appendChild(avatar);
+      }
+
+      document.getElementById('nombreResumen').textContent = nombreVisible;
+      document.getElementById('correoResumen').textContent = correo;
+      document.getElementById('nombreDetalle').textContent = nombreVisible;
+      document.getElementById('correoDetalle').textContent = correo;
+      document.getElementById('nombreInput').value = nombre;
+      document.getElementById('fotoInput').value = fotoUrl;
+    }
+
+    function mostrarMensaje(texto, tipo) {
+      const mensaje = document.getElementById('mensaje');
+      mensaje.textContent = texto;
+      mensaje.className = 'mensaje ' + tipo;
+    }
+
+    async function obtenerMensajeError(res) {
+      const text = await res.text().catch(() => '');
+      if (!text) return 'No se pudo actualizar el perfil';
+
+      try {
+        const error = JSON.parse(text);
+        return error.detalles || error.mensaje || text;
+      } catch (e) {
+        return text;
+      }
+    }
+
+    document.getElementById('nombreForm').addEventListener('submit', async event => {
+      event.preventDefault();
+
+      const nombre = document.getElementById('nombreInput').value.trim();
+      if (!nombre) {
+        mostrarMensaje('El nombre no puede estar vacio', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/usuarios/${usuarioActual.id}/nombre`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre })
+        });
+
+        if (!res.ok) {
+          mostrarMensaje(await obtenerMensajeError(res), 'error');
+          return;
+        }
+
+        const actualizado = await res.json();
+        usuarioActual = {
+          id: actualizado.id,
+          correo: actualizado.correo,
+          nombre: actualizado.nombre || '',
+          fotoUrl: actualizado.fotoUrl || ''
+        };
+
+        localStorage.setItem('usuarioAutenticado', JSON.stringify(usuarioActual));
+        renderPerfil(usuarioActual);
+        mostrarMensaje('Nombre actualizado correctamente', 'success');
+      } catch (err) {
+        mostrarMensaje('No se pudo conectar con el servidor', 'error');
+      }
+    });
+
+    document.getElementById('fotoForm').addEventListener('submit', async event => {
+      event.preventDefault();
+
+      const fotoUrl = document.getElementById('fotoInput').value.trim();
+      if (!fotoUrl) {
+        mostrarMensaje('La URL de la foto no puede estar vacia', 'error');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/usuarios/${usuarioActual.id}/foto`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fotoUrl })
+        });
+
+        if (!res.ok) {
+          mostrarMensaje(await obtenerMensajeError(res), 'error');
+          return;
+        }
+
+        const actualizado = await res.json();
+        usuarioActual = {
+          id: actualizado.id,
+          correo: actualizado.correo,
+          nombre: actualizado.nombre || '',
+          fotoUrl: actualizado.fotoUrl || ''
+        };
+
+        localStorage.setItem('usuarioAutenticado', JSON.stringify(usuarioActual));
+        renderPerfil(usuarioActual);
+        mostrarMensaje('Foto actualizada correctamente', 'success');
+      } catch (err) {
+        mostrarMensaje('No se pudo conectar con el servidor', 'error');
+      }
+    });
+
+    document.getElementById('fotoUploadForm').addEventListener('submit', async event => {
+      event.preventDefault();
+
+      const archivo = document.getElementById('fotoArchivo').files[0];
+      if (!archivo) {
+        mostrarMensaje('Debe seleccionar una imagen', 'error');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('foto', archivo);
+
+      try {
+        const res = await fetch(`/api/usuarios/${usuarioActual.id}/foto-upload`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) {
+          mostrarMensaje(await obtenerMensajeError(res), 'error');
+          return;
+        }
+
+        const actualizado = await res.json();
+        usuarioActual = {
+          id: actualizado.id,
+          correo: actualizado.correo,
+          nombre: actualizado.nombre || '',
+          fotoUrl: actualizado.fotoUrl || ''
+        };
+
+        localStorage.setItem('usuarioAutenticado', JSON.stringify(usuarioActual));
+        document.getElementById('fotoArchivo').value = '';
+        renderPerfil(usuarioActual);
+        mostrarMensaje('Foto subida correctamente', 'success');
+      } catch (err) {
+        mostrarMensaje('No se pudo conectar con el servidor', 'error');
+      }
+    });
+  </script>
+</body>
+</html>

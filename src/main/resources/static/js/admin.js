@@ -1,4 +1,28 @@
 const API = '/api';
+let usuarioActual = null;
+
+function cargarUsuarioActual() {
+  const raw = localStorage.getItem('usuarioAutenticado');
+  if (!raw) {
+    window.location.href = 'login.html';
+    return false;
+  }
+
+  try {
+    const usuario = JSON.parse(raw);
+    if (!usuario || !usuario.id) {
+      localStorage.removeItem('usuarioAutenticado');
+      window.location.href = 'login.html';
+      return false;
+    }
+    usuarioActual = usuario;
+    return true;
+  } catch (err) {
+    localStorage.removeItem('usuarioAutenticado');
+    window.location.href = 'login.html';
+    return false;
+  }
+}
 
 function showMessage(msg, isError) {
   const el = document.getElementById('message');
@@ -313,7 +337,7 @@ function showInputModal({ title, label, initialValue = '', submitText = 'Aceptar
 
 async function fetchCategories() {
   try {
-    const res = await fetch(`${API}/categorias`);
+    const res = await fetch(`${API}/categorias?usuarioId=${usuarioActual.id}`);
     if (!res.ok) throw new Error('No se pudo obtener categorías');
     const data = await res.json();
     renderCategories(data);
@@ -338,8 +362,8 @@ function renderCategories(items) {
       <td>${escapeHtml(cat.tipo || '')}</td>
       <td class="actions">
         <button class="btn small" data-id="${cat.id}" data-action="view">Ver</button>
-        <button class="btn small" data-id="${cat.id}" data-action="edit">Editar</button>
-        <button class="btn small danger" data-id="${cat.id}" data-action="delete">Eliminar</button>
+        <button class="btn small" data-id="${cat.id}" data-action="edit" ${cat.global ? 'disabled title="Categoria predefinida"' : ''}>Editar</button>
+        <button class="btn small danger" data-id="${cat.id}" data-action="delete" ${cat.global ? 'disabled title="Categoria predefinida"' : ''}>Eliminar</button>
       </td>
     `;
     body.appendChild(tr);
@@ -354,7 +378,7 @@ function renderCategories(items) {
       const nombre = row.children[1].textContent;
       const descripcion = row.children[2].textContent;
       const tipo = row.children[3].textContent;
-      const cat = { id: parseInt(id,10), nombre, descripcion, tipo };
+      const cat = items.find(item => item.id === parseInt(id, 10)) || { id: parseInt(id,10), nombre, descripcion, tipo };
       if (action === 'view') return viewCategory(cat);
       if (action === 'edit') return editCategory(cat);
       if (action === 'delete') return deleteCategory(cat);
@@ -375,6 +399,11 @@ function viewCategory(cat) {
 }
 
 async function editCategory(cat) {
+  if (cat.global) {
+    showMessage('Las categorias predefinidas no se pueden modificar', true);
+    return;
+  }
+
   try {
     const values = await showFormModal({
       title: 'Editar categoria',
@@ -395,7 +424,7 @@ async function editCategory(cat) {
       return;
     }
 
-    const res = await fetch(`${API}/categorias/${cat.id}`, {
+    const res = await fetch(`${API}/categorias/${cat.id}?usuarioId=${usuarioActual.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -414,8 +443,13 @@ async function editCategory(cat) {
 }
 
 async function deleteCategory(cat) {
+  if (cat.global) {
+    showMessage('Las categorias predefinidas no se pueden eliminar', true);
+    return;
+  }
+
   try {
-    const refRes = await fetch(`${API}/categorias/${cat.id}/referencias`);
+    const refRes = await fetch(`${API}/categorias/${cat.id}/referencias?usuarioId=${usuarioActual.id}`);
     if (!refRes.ok) throw new Error('No se pudo obtener información de referencias');
     const info = await refRes.json();
 
@@ -427,7 +461,7 @@ async function deleteCategory(cat) {
         confirmText: 'Eliminar'
       });
       if (!confirmado) return;
-      const res = await fetch(`${API}/categorias/${cat.id}`, { method: 'DELETE' });
+      const res = await fetch(`${API}/categorias/${cat.id}?usuarioId=${usuarioActual.id}`, { method: 'DELETE' });
       if (res.status === 204) { showMessage('Categoría eliminada'); fetchCategories(); }
       else { showMessage('Error eliminando categoría', true); }
       return;
@@ -450,7 +484,7 @@ async function deleteCategory(cat) {
         label: 'ID de categoria destino'
       });
       if (!target) return;
-      const res = await fetch(`${API}/categorias/${cat.id}/eliminar`, {
+      const res = await fetch(`${API}/categorias/${cat.id}/eliminar?usuarioId=${usuarioActual.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ confirmar: true, reasignarCategoriaId: parseInt(target,10) })
@@ -467,7 +501,7 @@ async function deleteCategory(cat) {
         confirmText: 'Eliminar transacciones'
       });
       if (!confirmado) return;
-      const res = await fetch(`${API}/categorias/${cat.id}/eliminar`, {
+      const res = await fetch(`${API}/categorias/${cat.id}/eliminar?usuarioId=${usuarioActual.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ confirmar: true, eliminarTransacciones: true })
@@ -493,7 +527,7 @@ async function createCategory(event) {
     const res = await fetch(`${API}/categorias`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre, descripcion, tipo })
+      body: JSON.stringify({ nombre, descripcion, tipo, usuarioId: usuarioActual.id })
     });
 
     if (res.status === 201) {
@@ -510,6 +544,7 @@ async function createCategory(event) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (!cargarUsuarioActual()) return;
   document.getElementById('createForm').addEventListener('submit', createCategory);
   fetchCategories();
 });

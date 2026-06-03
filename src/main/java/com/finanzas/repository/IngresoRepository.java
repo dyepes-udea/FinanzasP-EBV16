@@ -10,8 +10,10 @@ import java.util.List;
 @Repository
 public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
     List<Ingreso> findAllByOrderByFechaDesc();
+    List<Ingreso> findByUsuario_IdOrderByFechaDesc(Long usuarioId);
     List<Ingreso> findByCategoriaOrderByFechaDesc(Categoria categoria);
     List<Ingreso> findByCategoria_IdOrderByFechaDesc(Long categoriaId);
+    List<Ingreso> findByUsuario_IdAndCategoria_IdOrderByFechaDesc(Long usuarioId, Long categoriaId);
     long countByCategoria_Id(Long categoriaId);
     long countByFuenteIngreso_Id(Long fuenteIngresoId);
 }

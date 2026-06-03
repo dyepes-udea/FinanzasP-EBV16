@@ -10,10 +10,13 @@ public class IngresoCreacionDTO {
     @NotBlank(message = "La descripción es obligatoria")
     private String descripcion;
     
-    @NotNull(message = "El ID de categoría es obligatorio")
     private Long categoriaId;
     
+    @NotNull(message = "El ID de fuente de ingreso es obligatorio")
     private Long fuenteIngresoId;
+
+    @NotNull(message = "El ID de usuario es obligatorio")
+    private Long usuarioId;
     
     @NotNull(message = "El monto es obligatorio")
     @Positive(message = "El monto debe ser positivo")
@@ -39,6 +42,9 @@ public class IngresoCreacionDTO {
 
     public Long getFuenteIngresoId() { return fuenteIngresoId; }
     public void setFuenteIngresoId(Long fuenteIngresoId) { this.fuenteIngresoId = fuenteIngresoId; }
+
+    public Long getUsuarioId() { return usuarioId; }
+    public void setUsuarioId(Long usuarioId) { this.usuarioId = usuarioId; }
 
     public Double getMonto() { return monto; }
     public void setMonto(Double monto) { this.monto = monto; }
