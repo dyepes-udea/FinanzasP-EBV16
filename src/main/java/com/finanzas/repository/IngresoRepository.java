@@ -14,6 +14,7 @@ public interface IngresoRepository extends JpaRepository<Ingreso, Long> {
     List<Ingreso> findByCategoriaOrderByFechaDesc(Categoria categoria);
     List<Ingreso> findByCategoria_IdOrderByFechaDesc(Long categoriaId);
     List<Ingreso> findByUsuario_IdAndCategoria_IdOrderByFechaDesc(Long usuarioId, Long categoriaId);
+    List<Ingreso> findByUsuario_IdAndFuenteIngreso_IdOrderByFechaDesc(Long usuarioId, Long fuenteIngresoId);
     long countByCategoria_Id(Long categoriaId);
     long countByFuenteIngreso_Id(Long fuenteIngresoId);
 }

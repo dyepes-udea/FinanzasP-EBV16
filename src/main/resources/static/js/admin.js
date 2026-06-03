@@ -354,6 +354,7 @@ function renderCategories(items) {
     return;
   }
   items.forEach((cat, index) => {
+    const esDelUsuario = cat.usuarioId === usuarioActual.id;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${index + 1}</td>
@@ -362,8 +363,8 @@ function renderCategories(items) {
       <td>${escapeHtml(cat.tipo || '')}</td>
       <td class="actions">
         <button class="btn small" data-id="${cat.id}" data-action="view">Ver</button>
-        <button class="btn small" data-id="${cat.id}" data-action="edit" ${cat.global ? 'disabled title="Categoria predefinida"' : ''}>Editar</button>
-        <button class="btn small danger" data-id="${cat.id}" data-action="delete" ${cat.global ? 'disabled title="Categoria predefinida"' : ''}>Eliminar</button>
+        <button class="btn small" data-id="${cat.id}" data-action="edit" ${esDelUsuario ? '' : 'disabled title="Categoria no pertenece al usuario"'}>Editar</button>
+        <button class="btn small danger" data-id="${cat.id}" data-action="delete" ${esDelUsuario ? '' : 'disabled title="Categoria no pertenece al usuario"'}>Eliminar</button>
       </td>
     `;
     body.appendChild(tr);
@@ -398,9 +399,13 @@ function viewCategory(cat) {
   });
 }
 
+function categoriaPerteneceAlUsuario(cat) {
+  return cat && cat.usuarioId === usuarioActual.id;
+}
+
 async function editCategory(cat) {
-  if (cat.global) {
-    showMessage('Las categorias predefinidas no se pueden modificar', true);
+  if (!categoriaPerteneceAlUsuario(cat)) {
+    showMessage('La categoria no pertenece al usuario autenticado', true);
     return;
   }
 
@@ -443,8 +448,8 @@ async function editCategory(cat) {
 }
 
 async function deleteCategory(cat) {
-  if (cat.global) {
-    showMessage('Las categorias predefinidas no se pueden eliminar', true);
+  if (!categoriaPerteneceAlUsuario(cat)) {
+    showMessage('La categoria no pertenece al usuario autenticado', true);
     return;
   }
 

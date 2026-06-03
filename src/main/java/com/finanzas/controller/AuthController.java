@@ -3,7 +3,12 @@ package com.finanzas.controller;
 import com.finanzas.dto.ErrorResponseDTO;
 import com.finanzas.dto.LoginUsuarioDTO;
 import com.finanzas.dto.RegistroUsuarioDTO;
+import com.finanzas.entity.Categoria;
+import com.finanzas.entity.FuenteIngreso;
+import com.finanzas.entity.TipoCategoria;
 import com.finanzas.entity.Usuario;
+import com.finanzas.repository.CategoriaRepository;
+import com.finanzas.repository.FuenteIngresoRepository;
 import com.finanzas.repository.UsuarioRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +29,14 @@ public class AuthController {
     private static final Pattern CORREO_VALIDO = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     private final UsuarioRepository usuarioRepository;
+    private final CategoriaRepository categoriaRepository;
+    private final FuenteIngresoRepository fuenteIngresoRepository;
 
-    public AuthController(UsuarioRepository usuarioRepository) {
+    public AuthController(UsuarioRepository usuarioRepository, CategoriaRepository categoriaRepository,
+                          FuenteIngresoRepository fuenteIngresoRepository) {
         this.usuarioRepository = usuarioRepository;
+        this.categoriaRepository = categoriaRepository;
+        this.fuenteIngresoRepository = fuenteIngresoRepository;
     }
 
     @PostMapping("/registro")
@@ -61,6 +71,8 @@ public class AuthController {
         usuario.setFotoUrl("");
 
         Usuario guardado = usuarioRepository.save(usuario);
+        crearDatosInicialesDelUsuario(guardado);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of(
                         "id", guardado.getId(),
@@ -93,6 +105,31 @@ public class AuthController {
                         "fotoUrl", usuario.getFotoUrl() != null ? usuario.getFotoUrl() : ""
                 )))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new ErrorResponseDTO(401, "Credenciales invalidas", "Usuario o contraseña incorrectos")));
+                        .body(new ErrorResponseDTO(401, "Credenciales invalidas", "Usuario o contrasena incorrectos")));
+    }
+
+    private void crearDatosInicialesDelUsuario(Usuario usuario) {
+        crearCategoriaInicial(usuario, "Comida", "Gastos en alimentacion y restaurantes");
+        crearCategoriaInicial(usuario, "Transporte", "Gastos de transporte y combustible");
+        crearCategoriaInicial(usuario, "Servicios", "Servicios basicos (agua, luz, internet)");
+        crearCategoriaInicial(usuario, "Salud", "Gastos medicos y de salud");
+        crearCategoriaInicial(usuario, "Entretenimiento", "Gastos de ocio y entretenimiento");
+
+        crearFuenteInicial(usuario, "Salario", "Ingreso por empleo regular");
+        crearFuenteInicial(usuario, "Horas Extra", "Ingreso por trabajo adicional");
+        crearFuenteInicial(usuario, "Comisiones", "Ingreso por comisiones de ventas");
+        crearFuenteInicial(usuario, "Bonificaciones", "Ingreso por bonos y gratificaciones");
+    }
+
+    private void crearCategoriaInicial(Usuario usuario, String nombre, String descripcion) {
+        Categoria categoria = new Categoria(nombre, descripcion, TipoCategoria.GASTO);
+        categoria.setUsuario(usuario);
+        categoriaRepository.save(categoria);
+    }
+
+    private void crearFuenteInicial(Usuario usuario, String nombre, String descripcion) {
+        FuenteIngreso fuente = new FuenteIngreso(nombre, descripcion);
+        fuente.setUsuario(usuario);
+        fuenteIngresoRepository.save(fuente);
     }
 }

@@ -49,7 +49,8 @@ public class FuenteIngresoController {
     @GetMapping
     public ResponseEntity<?> listar(@RequestParam(required = false) Long usuarioId) {
         if (usuarioId == null) {
-            return ResponseEntity.ok(fuenteRepository.findByUsuarioIsNullOrderByNombre());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Usuario obligatorio", "Debe enviar usuarioId"));
         }
         if (!usuarioRepository.existsById(usuarioId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -65,7 +66,7 @@ public class FuenteIngresoController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ErrorResponseDTO(404, "Fuente no encontrada", "La fuente con ID " + id + " no existe"));
         }
-        if (!esVisibleParaUsuario(fuente.get(), usuarioId)) {
+        if (!perteneceAlUsuario(fuente.get(), usuarioId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ErrorResponseDTO(403, "Fuente no permitida", "La fuente no pertenece al usuario"));
         }
@@ -109,6 +110,11 @@ public class FuenteIngresoController {
     public ResponseEntity<?> actualizar(@PathVariable Long id,
                                         @RequestParam(required = false) Long usuarioId,
                                         @Valid @RequestBody ActualizarFuenteIngresoDTO actualizar) {
+        if (actualizar == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Fuente invalida", "Debe enviar los datos de la fuente"));
+        }
+
         Optional<FuenteIngreso> fuenteExistente = fuenteRepository.findById(id);
         if (fuenteExistente.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -138,6 +144,11 @@ public class FuenteIngresoController {
     public ResponseEntity<?> actualizarParcial(@PathVariable Long id,
                                                @RequestParam(required = false) Long usuarioId,
                                                @RequestBody ActualizarFuenteIngresoDTO actualizar) {
+        if (actualizar == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Fuente invalida", "Debe enviar los datos de la fuente"));
+        }
+
         Optional<FuenteIngreso> fuenteExistente = fuenteRepository.findById(id);
         if (fuenteExistente.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -197,7 +208,7 @@ public class FuenteIngresoController {
         if (permiso != null) return permiso;
 
         FuenteIngreso fuente = fuenteExistente.get();
-        long ingresosVinculados = ingresoRepository.countByFuenteIngreso_Id(id);
+        long ingresosVinculados = ingresoRepository.findByUsuario_IdAndFuenteIngreso_IdOrderByFechaDesc(usuarioId, id).size();
         return ResponseEntity.ok(new InfoEliminacionFuenteDTO(id, fuente.getNombre(), ingresosVinculados));
     }
 
@@ -215,7 +226,7 @@ public class FuenteIngresoController {
         ResponseEntity<?> permiso = validarGestionFuente(fuente, usuarioId, "eliminar");
         if (permiso != null) return permiso;
 
-        long ingresosVinculados = ingresoRepository.countByFuenteIngreso_Id(id);
+        long ingresosVinculados = ingresoRepository.findByUsuario_IdAndFuenteIngreso_IdOrderByFechaDesc(usuarioId, id).size();
         if (ingresosVinculados == 0) {
             fuenteRepository.deleteById(id);
             return ResponseEntity.noContent().build();
@@ -229,6 +240,7 @@ public class FuenteIngresoController {
 
         boolean eliminarTrans = (boolean) dto.getOrDefault("eliminarTransacciones", false);
         if (eliminarTrans) {
+            ingresoRepository.deleteAll(ingresoRepository.findByUsuario_IdAndFuenteIngreso_IdOrderByFechaDesc(usuarioId, id));
             fuenteRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         }
@@ -249,7 +261,7 @@ public class FuenteIngresoController {
         ResponseEntity<?> permiso = validarGestionFuente(fuente, usuarioId, "eliminar");
         if (permiso != null) return permiso;
 
-        long ingresosVinculados = ingresoRepository.countByFuenteIngreso_Id(id);
+        long ingresosVinculados = ingresoRepository.findByUsuario_IdAndFuenteIngreso_IdOrderByFechaDesc(usuarioId, id).size();
         if (ingresosVinculados > 0) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new ErrorResponseDTO(409, "Fuente en uso",
@@ -289,19 +301,16 @@ public class FuenteIngresoController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponseDTO(400, "Usuario obligatorio", "Debe enviar usuarioId"));
         }
-        if (fuente.getUsuario() == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ErrorResponseDTO(403, "Fuente predefinida", "Las fuentes predefinidas no se pueden " + accion));
-        }
-        if (!fuente.getUsuario().getId().equals(usuarioId)) {
+        if (!perteneceAlUsuario(fuente, usuarioId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ErrorResponseDTO(403, "Fuente no permitida", "La fuente no pertenece al usuario"));
         }
         return null;
     }
 
-    private boolean esVisibleParaUsuario(FuenteIngreso fuente, Long usuarioId) {
-        return fuente.getUsuario() == null
-                || (usuarioId != null && fuente.getUsuario().getId().equals(usuarioId));
+    private boolean perteneceAlUsuario(FuenteIngreso fuente, Long usuarioId) {
+        return fuente.getUsuario() != null
+                && fuente.getUsuario().getId() != null
+                && fuente.getUsuario().getId().equals(usuarioId);
     }
 }

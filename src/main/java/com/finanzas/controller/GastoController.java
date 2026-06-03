@@ -171,7 +171,8 @@ public class GastoController {
     }
 
     private boolean categoriaVisibleParaUsuario(Categoria categoria, Long usuarioId) {
-        return categoria.getUsuario() == null
-                || (usuarioId != null && categoria.getUsuario().getId().equals(usuarioId));
+        return categoria.getUsuario() != null
+                && categoria.getUsuario().getId() != null
+                && categoria.getUsuario().getId().equals(usuarioId);
     }
 }
