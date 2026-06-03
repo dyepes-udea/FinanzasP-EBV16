@@ -58,7 +58,12 @@ public class Categoria {
     public Usuario getUsuario() { return usuario; }
     public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
-    public Long getUsuarioId() { return usuarioId; }
+    public Long getUsuarioId() {
+        if (usuarioId != null) {
+            return usuarioId;
+        }
+        return usuario != null ? usuario.getId() : null;
+    }
     public void setUsuarioId(Long usuarioId) { this.usuarioId = usuarioId; }
 
     public boolean isGlobal() { return usuario == null; }

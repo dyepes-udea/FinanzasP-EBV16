@@ -63,7 +63,8 @@ public class CategoriaController {
     @GetMapping("/tipo/{tipo}")
     public ResponseEntity<?> listarPorTipo(@PathVariable TipoCategoria tipo, @RequestParam(required = false) Long usuarioId) {
         if (usuarioId == null) {
-            return ResponseEntity.ok(categoriaRepository.findByTipoAndUsuarioIsNullOrderByNombre(tipo));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponseDTO(400, "Usuario obligatorio", "Debe enviar usuarioId"));
         }
         if (!usuarioRepository.existsById(usuarioId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -79,7 +80,7 @@ public class CategoriaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ErrorResponseDTO(404, "Categoria no encontrada", "La categoria con ID " + id + " no existe"));
         }
-        if (!esVisibleParaUsuario(categoria.get(), usuarioId)) {
+        if (!perteneceAlUsuario(categoria.get(), usuarioId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ErrorResponseDTO(403, "Categoria no permitida", "La categoria no pertenece al usuario"));
         }
@@ -274,7 +275,7 @@ public class CategoriaController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(new ErrorResponseDTO(404, "Categoria de reasignacion no encontrada", "La categoria con ID " + reasignarId + " no existe"));
             }
-            if (!esVisibleParaUsuario(targetOpt.get(), usuarioId)) {
+            if (!perteneceAlUsuario(targetOpt.get(), usuarioId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(new ErrorResponseDTO(403, "Categoria no permitida", "La categoria de reasignacion no pertenece al usuario"));
             }
@@ -365,20 +366,16 @@ public class CategoriaController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponseDTO(400, "Usuario obligatorio", "Debe enviar usuarioId"));
         }
-        if (categoria.getUsuario() == null) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(new ErrorResponseDTO(403, "Categoria predefinida",
-                            "Las categorias predefinidas no se pueden " + accion));
-        }
-        if (!categoria.getUsuario().getId().equals(usuarioId)) {
+        if (!perteneceAlUsuario(categoria, usuarioId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ErrorResponseDTO(403, "Categoria no permitida", "La categoria no pertenece al usuario"));
         }
         return null;
     }
 
-    private boolean esVisibleParaUsuario(Categoria categoria, Long usuarioId) {
-        return categoria.getUsuario() == null
-                || (usuarioId != null && categoria.getUsuario().getId().equals(usuarioId));
+    private boolean perteneceAlUsuario(Categoria categoria, Long usuarioId) {
+        return categoria.getUsuario() != null
+                && categoria.getUsuario().getId() != null
+                && categoria.getUsuario().getId().equals(usuarioId);
     }
 }

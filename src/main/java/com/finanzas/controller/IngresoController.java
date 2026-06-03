@@ -170,7 +170,8 @@ public class IngresoController {
     }
 
     private boolean fuenteVisibleParaUsuario(FuenteIngreso fuente, Long usuarioId) {
-        return fuente.getUsuario() == null
-                || (usuarioId != null && fuente.getUsuario().getId().equals(usuarioId));
+        return fuente.getUsuario() != null
+                && fuente.getUsuario().getId() != null
+                && fuente.getUsuario().getId().equals(usuarioId);
     }
 }

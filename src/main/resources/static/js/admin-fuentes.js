@@ -246,14 +246,15 @@ function renderFuentes(items) {
     return;
   }
   items.forEach(fuente => {
+    const esDelUsuario = fuente.usuarioId === usuarioActual.id;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${fuente.id}</td>
       <td>${escapeHtml(fuente.nombre || '')}</td>
       <td>${escapeHtml(fuente.descripcion || '')}</td>
       <td class="actions">
-        <button class="btn small" data-id="${fuente.id}" data-action="edit" ${fuente.global ? 'disabled title="Fuente predefinida"' : ''}>Editar</button>
-        <button class="btn small danger" data-id="${fuente.id}" data-action="delete" ${fuente.global ? 'disabled title="Fuente predefinida"' : ''}>Eliminar</button>
+        <button class="btn small" data-id="${fuente.id}" data-action="edit" ${esDelUsuario ? '' : 'disabled title="Fuente no pertenece al usuario"'}>Editar</button>
+        <button class="btn small danger" data-id="${fuente.id}" data-action="delete" ${esDelUsuario ? '' : 'disabled title="Fuente no pertenece al usuario"'}>Eliminar</button>
       </td>
     `;
     body.appendChild(tr);
@@ -273,9 +274,13 @@ function renderFuentes(items) {
   });
 }
 
+function fuentePerteneceAlUsuario(fuente) {
+  return fuente && fuente.usuarioId === usuarioActual.id;
+}
+
 async function editFuente(fuente) {
-  if (fuente.global) {
-    showMessage('Las fuentes predefinidas no se pueden modificar', true);
+  if (!fuentePerteneceAlUsuario(fuente)) {
+    showMessage('La fuente no pertenece al usuario autenticado', true);
     return;
   }
 
@@ -317,8 +322,8 @@ async function editFuente(fuente) {
 }
 
 async function deleteFuente(fuente) {
-  if (fuente.global) {
-    showMessage('Las fuentes predefinidas no se pueden eliminar', true);
+  if (!fuentePerteneceAlUsuario(fuente)) {
+    showMessage('La fuente no pertenece al usuario autenticado', true);
     return;
   }
 
