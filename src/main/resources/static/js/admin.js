@@ -434,8 +434,8 @@ async function editCategory(cat) {
       showMessage('Categoría actualizada');
       fetchCategories();
     } else {
-      const err = await res.json().catch(() => ({}));
-      showMessage(err.detalles || err.mensaje || 'Error al actualizar', true);
+      const error = await getBackendErrorMessage(res, 'Error al actualizar categoria');
+      showMessage(error, true);
     }
   } catch (err) {
     showMessage(err.message || err, true);
@@ -450,10 +450,12 @@ async function deleteCategory(cat) {
 
   try {
     const refRes = await fetch(`${API}/categorias/${cat.id}/referencias?usuarioId=${usuarioActual.id}`);
-    if (!refRes.ok) throw new Error('No se pudo obtener información de referencias');
+    if (!refRes.ok) {
+      throw new Error(await getBackendErrorMessage(refRes, 'No se pudo obtener información de referencias'));
+    }
     const info = await refRes.json();
 
-    if (info.puedeEliminar) {
+    if (Boolean(info.puedeEliminar)) {
       const confirmado = await showConfirmModal({
         title: 'Eliminar categoría',
         message: 'Se eliminará la categoría:',
@@ -463,7 +465,7 @@ async function deleteCategory(cat) {
       if (!confirmado) return;
       const res = await fetch(`${API}/categorias/${cat.id}?usuarioId=${usuarioActual.id}`, { method: 'DELETE' });
       if (res.status === 204) { showMessage('Categoría eliminada'); fetchCategories(); }
-      else { showMessage('Error eliminando categoría', true); }
+      else { showMessage(await getBackendErrorMessage(res, 'Error eliminando categoria'), true); }
       return;
     }
 
@@ -490,7 +492,7 @@ async function deleteCategory(cat) {
         body: JSON.stringify({ confirmar: true, reasignarCategoriaId: parseInt(target,10) })
       });
       if (res.status === 204) { showMessage('Reasignadas y categoría eliminada'); fetchCategories(); }
-      else { const err = await res.json().catch(()=>({})); showMessage(err.detalles||err.mensaje||'Error', true); }
+      else { showMessage(await getBackendErrorMessage(res, 'Error reasignando transacciones'), true); }
       return;
     }
     if (opt === 'borrar') {
@@ -507,7 +509,7 @@ async function deleteCategory(cat) {
         body: JSON.stringify({ confirmar: true, eliminarTransacciones: true })
       });
       if (res.status === 204) { showMessage('Transacciones y categoría eliminadas'); fetchCategories(); }
-      else { const err = await res.json().catch(()=>({})); showMessage(err.detalles||err.mensaje||'Error', true); }
+      else { showMessage(await getBackendErrorMessage(res, 'Error eliminando transacciones'), true); }
       return;
     }
 
